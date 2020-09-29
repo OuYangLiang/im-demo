@@ -11,7 +11,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
  */
 public class RouteHandler extends ChannelHandlerAdapter {
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof FullHttpRequest) {
             if ("/websocket".equalsIgnoreCase(((FullHttpRequest)msg).uri())) {
                 ctx.pipeline().addLast(new WebSocketServerProtocolHandler("/websocket"));

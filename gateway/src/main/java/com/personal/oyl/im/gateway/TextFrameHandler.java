@@ -1,14 +1,14 @@
 package com.personal.oyl.im.gateway;
 
-import io.netty.channel.Channel;
+import com.personal.oyl.im.gateway.model.ConnectionMgr;
+import com.personal.oyl.im.gateway.model.ConnectionMgrImpl;
+import com.personal.oyl.im.gateway.model.Protocol;
+import com.personal.oyl.im.gateway.model.ProtocolType;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.timeout.IdleStateEvent;
 
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author OuYang Liang
@@ -16,41 +16,39 @@ import java.util.Map;
  */
 public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 
-    private static final Map<String, String> liveConns = new HashMap<>();
-    private static final Map<String, Channel> channels = new HashMap<>();
+    private static final ConnectionMgr connectionMgr = new ConnectionMgrImpl();
 
     public static void say(String id, String message) {
-        channels.get(id).writeAndFlush(new TextWebSocketFrame(message));
+        connectionMgr.queryChannel(id).writeAndFlush(new TextWebSocketFrame(message));
     }
 
     @Override
-    protected void messageReceived(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
-        if (msg.text().equalsIgnoreCase("heartbeat")) {
-            ctx.writeAndFlush(new TextWebSocketFrame("heartbeat ok"));
-            return;
-        }
+    protected void messageReceived(ChannelHandlerContext ctx, TextWebSocketFrame msg) {
+        System.out.println("Received: " + msg.text());
 
-        if (msg.text().startsWith("Login:")) {
-            String id = msg.text().substring(6);
-            liveConns.put(ctx.channel().id().asLongText(), id);
-            channels.put(id, ctx.channel());
+        Protocol protocol = Protocol.fromJson(msg.text());
+
+        if (ProtocolType.heartbeat.equals(protocol.getType())) {
+            protocol.setContent("1");
+            ctx.writeAndFlush(new TextWebSocketFrame(protocol.toJson()));
+        } else if (ProtocolType.connect.equals(protocol.getType())) {
+            connectionMgr.markConnected(protocol.getContent(), ctx.channel());
             ctx.writeAndFlush(new TextWebSocketFrame("Welcome to Netty"));
-            return;
+        } else if (ProtocolType.business.equals(protocol.getType())) {
+            ctx.writeAndFlush(new TextWebSocketFrame(connectionMgr.queryUserId(ctx.channel().id().asLongText()) + ": " + protocol.getContent()));
         }
-
-        ctx.writeAndFlush(new TextWebSocketFrame(liveConns.get(ctx.channel().id().asLongText()) + ": " + msg.text()));
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
     }
 
     @Override
-    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        if (evt.equals(WebSocketServerProtocolHandler.ServerHandshakeStateEvent.HANDSHAKE_COMPLETE)) {
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
+        /*if (evt.equals(WebSocketServerProtocolHandler.ServerHandshakeStateEvent.HANDSHAKE_COMPLETE)) {
 
-        } else if (evt.equals(IdleStateEvent.FIRST_ALL_IDLE_STATE_EVENT) || evt.equals(IdleStateEvent.ALL_IDLE_STATE_EVENT)) {
+        } else */if (evt.equals(IdleStateEvent.FIRST_ALL_IDLE_STATE_EVENT) || evt.equals(IdleStateEvent.ALL_IDLE_STATE_EVENT)) {
             ctx.channel().close();
         }
     }
@@ -64,6 +62,7 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         System.out.println("Channel 【" + ctx.channel().id().asLongText() + "】 inactive...");
+        connectionMgr.channelDisconnected(ctx.channel());
         super.channelInactive(ctx);
     }
 }

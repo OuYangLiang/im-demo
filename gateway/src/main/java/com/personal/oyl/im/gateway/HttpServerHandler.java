@@ -14,7 +14,7 @@ import io.netty.handler.codec.http.*;
 public class HttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     @Override
-    protected void messageReceived(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
+    protected void messageReceived(ChannelHandlerContext ctx, FullHttpRequest msg) {
 
         if (msg.uri().startsWith("/say")) {
             String[] str = msg.uri().substring(4).split("-");

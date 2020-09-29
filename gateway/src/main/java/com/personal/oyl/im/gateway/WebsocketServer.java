@@ -21,7 +21,7 @@ public class WebsocketServer {
 
     public void bind(int port) throws InterruptedException {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
-        EventLoopGroup workGroup = new NioEventLoopGroup();
+        EventLoopGroup workGroup = new NioEventLoopGroup(100);
 
         try {
             ServerBootstrap b = new ServerBootstrap();
@@ -30,7 +30,7 @@ public class WebsocketServer {
 //                    .option(ChannelOption.SO_BACKLOG, 1024)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
-                        protected void initChannel(SocketChannel ch) throws Exception {
+                        protected void initChannel(SocketChannel ch) {
                             ch.pipeline().addLast(new IdleStateHandler(0,0,10));
                             ch.pipeline().addLast(new HttpResponseEncoder());
                             ch.pipeline().addLast(new HttpRequestDecoder());
