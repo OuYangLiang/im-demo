@@ -11,6 +11,7 @@ public class Protocol {
     private static final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
     private ProtocolType type;
+    private String msgId;
     private String content;
 
     public ProtocolType getType() {
@@ -19,6 +20,14 @@ public class Protocol {
 
     public void setType(ProtocolType type) {
         this.type = type;
+    }
+
+    public String getMsgId() {
+        return msgId;
+    }
+
+    public void setMsgId(String msgId) {
+        this.msgId = msgId;
     }
 
     public String getContent() {
@@ -37,14 +46,13 @@ public class Protocol {
         return gson.toJson(this);
     }
 
-    /*public static void main(String[] args) {
-        Protocol p = new Protocol();
-        p.setType(ProtocolType.business);
-        p.setContent("this is the content");
+    public Protocol toAck() {
+        Protocol rlt = new Protocol();
+        rlt.setType(this.getType().getAckType());
+        rlt.setMsgId(this.getMsgId());
+        rlt.setContent(null);
 
-        System.out.println(p.toJson());
+        return rlt;
+    }
 
-        p = Protocol.fromJson(p.toJson());
-        System.out.println(p.toJson());
-    }*/
 }

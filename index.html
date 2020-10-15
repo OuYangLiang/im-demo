@@ -1,0 +1,117 @@
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>websocket通讯</title>
+</head>
+
+
+<body>
+
+    <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+    <center>
+
+      <table>
+          <tr><td align="right">userId<input id="userId" name="userId" type="text" value="" placeholder="user id"></td><td><a href="javascript:openSocket()">开启socket</a></td></tr>
+          <tr><td align="right">消息<input id="contentText" name="contentText" type="text" value="" placeholder="message"></td><td><a href="javascript:sendMessage()">发送消息</a></td></tr>
+      </table>
+
+    </center>
+
+</body>
+
+
+<script>
+    var socket;
+    var intervalId;
+    var connected = false;
+
+    function openSocket() {
+        if(typeof(WebSocket) == "undefined") {
+            alert("您的浏览器不支持WebSocket");
+            return;
+        }
+
+        if(socket!=null) {
+            socket.close();
+            socket=null;
+        }
+
+        socket = new WebSocket("ws://localhost:9080/webSocket");
+
+        socket.onopen = function() {
+            var param = {};
+            param.type = "connect";
+            param.msgId = uuid();
+            param.content = document.getElementById("userId").value;
+
+            socket.send(JSON.stringify(param));
+            alert("websocket已打开");
+            intervalId = setInterval(heartbeat, 20000);
+        };
+        //获得消息事件
+        socket.onmessage = function(msg) {
+            console.log(msg.data);
+            var data = JSON.parse(msg.data);
+            console.log(data);
+            if (data.type=="connect_ack") {
+                alert("connected");
+                connected = true;
+                return;
+            }
+
+            if (data.type=="heartbeat_ack" || data.type=="business_ack") {
+                return;
+            }
+
+            alert(msg.data);
+        };
+
+        socket.onclose = function() {
+            clearInterval(intervalId);
+            alert("websocket已关闭");
+        };
+
+        socket.onerror = function() {
+            alert("websocket发生了错误");
+        }
+
+    }
+
+    function sendMessage() {
+        if(typeof(WebSocket) == "undefined") {
+            alert("您的浏览器不支持WebSocket");
+            return;
+        }
+
+        var param = {};
+        param.type = "business";
+        param.content = document.getElementById("contentText").value;
+        param.msgId = uuid();
+        socket.send(JSON.stringify(param));
+    }
+
+    function heartbeat() {
+        var param = {};
+        param.type = "heartbeat";
+        param.msgId = uuid();
+        socket.send(JSON.stringify(param));
+    }
+
+    function  uuid() {
+        var  s = [];
+        var  hexDigits =  "0123456789abcdef" ;
+        for  ( var  i = 0; i < 36; i++) {
+            s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+        }
+        s[14] =  "4" ;   // bits 12-15 of the time_hi_and_version field to 0010
+        s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1);   // bits 6-7 of the clock_seq_hi_and_reserved to 01
+        s[8] = s[13] = s[18] = s[23] =  "-" ;
+
+        var  uuid = s.join( "" );
+        return  uuid;
+    }
+</script>
+
+</html>

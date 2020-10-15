@@ -6,6 +6,25 @@ package com.personal.oyl.im.gateway.model;
  */
 public enum ProtocolType {
     heartbeat,
+    heartbeat_ack,
     connect,
-    business;
+    connect_ack,
+    business,
+    business_ack;
+
+    public ProtocolType getAckType() {
+        if (ProtocolType.heartbeat.equals(this)) {
+            return ProtocolType.heartbeat_ack;
+        }
+
+        if (ProtocolType.connect.equals(this)) {
+            return ProtocolType.connect_ack;
+        }
+
+        if (ProtocolType.business.equals(this)) {
+            return ProtocolType.business_ack;
+        }
+
+        throw new IllegalArgumentException();
+    }
 }

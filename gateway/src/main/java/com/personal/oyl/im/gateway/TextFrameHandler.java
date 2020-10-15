@@ -9,6 +9,8 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.timeout.IdleStateEvent;
 
+import java.util.UUID;
+
 
 /**
  * @author OuYang Liang
@@ -19,7 +21,13 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
     private static final ConnectionMgr connectionMgr = new ConnectionMgrImpl();
 
     public static void say(String id, String message) {
-        connectionMgr.queryChannel(id).writeAndFlush(new TextWebSocketFrame(message));
+
+        Protocol protocol = new Protocol();
+        protocol.setType(ProtocolType.business);
+        protocol.setMsgId(UUID.randomUUID().toString());
+        protocol.setContent(message);
+
+        connectionMgr.queryChannel(id).writeAndFlush(new TextWebSocketFrame(protocol.toJson()));
     }
 
     @Override
@@ -29,14 +37,22 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
         Protocol protocol = Protocol.fromJson(msg.text());
 
         if (ProtocolType.heartbeat.equals(protocol.getType())) {
-            protocol.setContent("1");
-            ctx.writeAndFlush(new TextWebSocketFrame(protocol.toJson()));
+            ctx.writeAndFlush(new TextWebSocketFrame(protocol.toAck().toJson()));
         } else if (ProtocolType.connect.equals(protocol.getType())) {
             connectionMgr.markConnected(protocol.getContent(), ctx.channel());
-            ctx.writeAndFlush(new TextWebSocketFrame("Welcome to Netty"));
+            ctx.writeAndFlush(new TextWebSocketFrame(protocol.toAck().toJson()));
         } else if (ProtocolType.business.equals(protocol.getType())) {
-            ctx.writeAndFlush(new TextWebSocketFrame(connectionMgr.queryUserId(ctx.channel().id().asLongText()) + ": " + protocol.getContent()));
+            ctx.writeAndFlush(new TextWebSocketFrame(protocol.toAck().toJson()));
+//            ctx.writeAndFlush(new TextWebSocketFrame(this.reply(ctx, protocol.getContent()).toJson()));
         }
+    }
+
+    private Protocol reply(ChannelHandlerContext ctx, String message) {
+        Protocol protocol = new Protocol();
+        protocol.setType(ProtocolType.business);
+        protocol.setMsgId(UUID.randomUUID().toString());
+        protocol.setContent(connectionMgr.queryUserId(ctx.channel().id().asLongText()) + " says: " + message);
+        return protocol;
     }
 
     @Override
