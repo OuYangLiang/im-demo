@@ -11,6 +11,7 @@ public class Protocol {
     private static final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
     private ProtocolType type;
+    private MessageType subType;
     private String msgId;
     private String content;
 
@@ -20,6 +21,14 @@ public class Protocol {
 
     public void setType(ProtocolType type) {
         this.type = type;
+    }
+
+    public MessageType getSubType() {
+        return subType;
+    }
+
+    public void setSubType(MessageType subType) {
+        this.subType = subType;
     }
 
     public String getMsgId() {

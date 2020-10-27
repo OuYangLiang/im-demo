@@ -1,9 +1,6 @@
 package com.personal.oyl.im.gateway;
 
-import com.personal.oyl.im.gateway.model.ConnectionMgr;
-import com.personal.oyl.im.gateway.model.ConnectionMgrImpl;
-import com.personal.oyl.im.gateway.model.Protocol;
-import com.personal.oyl.im.gateway.model.ProtocolType;
+import com.personal.oyl.im.gateway.model.*;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
@@ -25,6 +22,7 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
         Protocol protocol = new Protocol();
         protocol.setType(ProtocolType.business);
         protocol.setMsgId(UUID.randomUUID().toString());
+        protocol.setSubType(MessageType.text);
         protocol.setContent(message);
 
         connectionMgr.queryChannel(id).writeAndFlush(new TextWebSocketFrame(protocol.toJson()));
@@ -43,6 +41,11 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
             ctx.writeAndFlush(new TextWebSocketFrame(protocol.toAck().toJson()));
         } else if (ProtocolType.business.equals(protocol.getType())) {
             ctx.writeAndFlush(new TextWebSocketFrame(protocol.toAck().toJson()));
+
+            if (MessageType.text.equals(protocol.getSubType())) {
+                TextMessage message = TextMessage.fromJson(protocol.getContent());
+                TextFrameHandler.say(message.getReceiverId(), message.getContent());
+            }
 //            ctx.writeAndFlush(new TextWebSocketFrame(this.reply(ctx, protocol.getContent()).toJson()));
         }
     }

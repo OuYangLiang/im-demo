@@ -14,6 +14,7 @@
 
       <table>
           <tr><td align="right">userId<input id="userId" name="userId" type="text" value="" placeholder="user id"></td><td><a href="javascript:openSocket()">开启socket</a></td></tr>
+          <tr><td align="right">To User<input id="userTo" name="userTo" type="text" value="" placeholder=""></td><td></td></tr>
           <tr><td align="right">消息<input id="contentText" name="contentText" type="text" value="" placeholder="message"></td><td><a href="javascript:sendMessage()">发送消息</a></td></tr>
       </table>
 
@@ -87,7 +88,12 @@
 
         var param = {};
         param.type = "business";
-        param.content = document.getElementById("contentText").value;
+        param.subType = "text";
+        param.content = {};
+        param.content.senderId = document.getElementById("userId").value;
+        param.content.receiverId = document.getElementById("userTo").value;
+        param.content.content = document.getElementById("contentText").value;
+        param.content = JSON.stringify(param.content);
         param.msgId = uuid();
         socket.send(JSON.stringify(param));
     }
