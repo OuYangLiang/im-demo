@@ -9,6 +9,8 @@ public enum ProtocolType {
     heartbeat_ack,
     connect,
     connect_ack,
+    online,
+    online_ack,
     business,
     business_ack;
 
@@ -23,6 +25,10 @@ public enum ProtocolType {
 
         if (ProtocolType.business.equals(this)) {
             return ProtocolType.business_ack;
+        }
+
+        if (ProtocolType.online.equals(this)) {
+            return ProtocolType.online_ack;
         }
 
         throw new IllegalArgumentException();

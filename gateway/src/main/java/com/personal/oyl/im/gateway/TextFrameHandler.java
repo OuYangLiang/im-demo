@@ -45,12 +45,30 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
         } else if (ProtocolType.connect.equals(protocol.getType())) {
             connectionMgr.markConnected(protocol.getContent(), ctx.channel());
             ctx.writeAndFlush(new TextWebSocketFrame(protocol.toAck().toJson()));
+
+
+            for (String userId : connectionMgr.onlineUsers()) {
+                if (!userId.equalsIgnoreCase(protocol.getContent())) {
+                    Protocol pro = new Protocol();
+                    pro.setType(ProtocolType.online);
+                    pro.setMsgId(UUID.randomUUID().toString());
+                    pro.setContent(protocol.getContent());
+
+                    connectionMgr.queryChannel(userId).writeAndFlush(new TextWebSocketFrame(pro.toJson()));
+                }
+            }
+
         } else if (ProtocolType.business.equals(protocol.getType())) {
             ctx.writeAndFlush(new TextWebSocketFrame(protocol.toAck().toJson()));
 
             if (MessageType.text.equals(protocol.getSubType())) {
                 TextMessage message = TextMessage.fromJson(protocol.getContent());
-                say(message.getReceiverId(), message.getContent());
+
+                TextMessage reply = new TextMessage();
+                reply.setSenderId(message.getSenderId());
+                reply.setReceiverId(message.getReceiverId());
+                reply.setContent(message.getContent());
+                say(message.getReceiverId(), reply.json());
             }
 //            ctx.writeAndFlush(new TextWebSocketFrame(this.reply(ctx, protocol.getContent()).toJson()));
         }

@@ -28,7 +28,7 @@
             <div v-for="message of currentMessages" >
                 <div class="message_box_received_header" v-if="message.direction == 'received'">
                     <div class="user">
-                        {{message.receiverId}}
+                        {{message.senderId}}
                     </div>
 
                     <div class="timestamp">
@@ -37,7 +37,7 @@
                 </div>
                 <div class="message_box_send_header" v-else>
                     <div class="user">
-                        {{message.senderId}}
+                        {{message.receiverId}}
                     </div>
 
                     <div class="timestamp">
@@ -159,16 +159,19 @@
                         }
 
                         res.body.data.forEach(function(item, idx) {
-                            var obj = {};
-                            obj.userId = item;
-                            obj.active = false;
-                            vm.contacts.push(obj);
+                            if (item != vm.userId) {
+                              var obj = {};
+                              obj.userId = item;
+                              obj.active = false;
+                              vm.contacts.push(obj);
+                            }
                         });
 
-                        vm.contacts[0].active = true;
-                        vm.currentActive = vm.contacts[0];
-                        vm.currentMessages = vm.messages[vm.currentActive.userId];
-
+                        if (vm.contacts.length == 1) {
+                            vm.contacts[0].active = true;
+                            vm.currentActive = vm.contacts[0];
+                            vm.currentMessages = vm.messages[vm.currentActive.userId];
+                        }
                     }, function(res) {
                         console.log(res);
                     });
@@ -236,6 +239,35 @@
                             return;
                         }
 
+                        if (data.type=="online") {
+                            var obj = {};
+                            obj.userId = data.content;
+                            obj.active = false;
+                            vm.contacts.push(obj);
+
+                            if (vm.contacts.length == 1) {
+                                vm.contacts[0].active = true;
+                                vm.currentActive = vm.contacts[0];
+                                vm.currentMessages = vm.messages[vm.currentActive.userId];
+                            }
+                            return;
+                        }
+
+                        if (data.type=="business" && data.subType =="text") {
+                            var datacontent = JSON.parse(data.content);
+                            var param = {};
+                            param.direction = "received";
+                            param.senderId = datacontent.senderId;
+                            param.receiverId = vm.userId;
+                            param.timestamp = "xxx";
+                            param.type = "text";
+                            param.content = datacontent.content;
+
+                            //this.currentMessages.push(param);
+                            console.log(datacontent);
+                            vm.messages[datacontent.senderId].push(param);
+                        }
+
                         alert(msg.data);
                     };
 
@@ -246,6 +278,22 @@
 
                     this.socket.onerror = function() {
                         alert("websocket发生了错误");
+                    }
+                }
+            },
+            watch: {
+                contacts: function (newContacts, oldContacts) {
+                    newContacts.forEach(function(contact) {
+                      if (!vm.messages.hasOwnProperty(contact.userId)) {
+                          console.log(vm.messages);
+                          vm.messages[contact.userId] = [];
+                      }
+                    });
+
+                    if (vm.contacts.length == 1) {
+                        vm.contacts[0].active = true;
+                        vm.currentActive = vm.contacts[0];
+                        vm.currentMessages = vm.messages[vm.currentActive.userId];
                     }
                 }
             },
