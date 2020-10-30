@@ -37,7 +37,7 @@
                 </div>
                 <div class="message_box_send_header" v-else>
                     <div class="user">
-                        {{message.receiverId}}
+                        {{message.senderId}}
                     </div>
 
                     <div class="timestamp">
@@ -101,24 +101,7 @@
                 contacts: [],
                 currentActive: null,
                 currentMessages: [],
-                messages: {"oyl":[
-                  {
-                    "direction": ["sent"],
-                    "senderId": "oyl",
-                    "receiverId": "oyl",
-                    "timestamp": "23 Jan 2:00 pm",
-                    "content": "Working with AdminLTE on a great new app! Wanna join?",
-                    "msgType": "text"
-                  },
-                  {
-                    "direction": ["received"],
-                    "senderId": "oyl",
-                    "receiverId": "oyl",
-                    "timestamp": "23 Jan 3:00 pm",
-                    "content": "Fuck you Fuck you",
-                    "msgType": "text"
-                  }
-                ]},
+                messages: {},
                 socket: null,
                 connected: false,
                 intervalId: null
@@ -153,7 +136,6 @@
                 },
                 initContactList: function() {
                     this.$http.post("onlineUsers", {userId: this.userId}, {emulateJSON: false}).then(function(res) {
-                        console.log(res);
                         if (!res.body.success) {
                             return;
                         }
@@ -166,12 +148,6 @@
                               vm.contacts.push(obj);
                             }
                         });
-
-                        if (vm.contacts.length == 1) {
-                            vm.contacts[0].active = true;
-                            vm.currentActive = vm.contacts[0];
-                            vm.currentMessages = vm.messages[vm.currentActive.userId];
-                        }
                     }, function(res) {
                         console.log(res);
                     });
@@ -198,9 +174,10 @@
 
                     //this.currentMessages.push(param);
                     this.messages[vm.currentActive.userId].push(param);
+                    this.contentInput = '';
                 },
                 connect: function() {
-                    if(this.socket!=null) {
+                    if (this.socket!=null) {
                         this.socket.close();
                         this.socket = null;
                     }
@@ -214,7 +191,7 @@
                         param.content = vm.userId;
 
                         vm.socket.send(JSON.stringify(param));
-                        alert("websocket已打开");
+                        //alert("websocket已打开");
                         vm.intervalId = setInterval(function() {
                             var param = {};
                             param.type = "heartbeat";
@@ -226,9 +203,8 @@
                     };
                     //获得消息事件
                     this.socket.onmessage = function(msg) {
-                        console.log(msg.data);
                         var data = JSON.parse(msg.data);
-                        console.log(data);
+                        //console.log(data);
                         if (data.type=="connect_ack") {
                             alert("connected");
                             vm.connected = true;
@@ -245,11 +221,16 @@
                             obj.active = false;
                             vm.contacts.push(obj);
 
-                            if (vm.contacts.length == 1) {
-                                vm.contacts[0].active = true;
-                                vm.currentActive = vm.contacts[0];
-                                vm.currentMessages = vm.messages[vm.currentActive.userId];
+                            return;
+                        }
+
+                        if (data.type=="offline") {
+                            for(i = 0, len = vm.contacts.length; i < len; i++) {
+                                if (vm.contacts[i].userId == data.content) {
+                                    vm.contacts.splice(i,1);
+                                }
                             }
+
                             return;
                         }
 
@@ -267,8 +248,6 @@
                             console.log(datacontent);
                             vm.messages[datacontent.senderId].push(param);
                         }
-
-                        alert(msg.data);
                     };
 
                     this.socket.onclose = function() {
@@ -284,10 +263,10 @@
             watch: {
                 contacts: function (newContacts, oldContacts) {
                     newContacts.forEach(function(contact) {
-                      if (!vm.messages.hasOwnProperty(contact.userId)) {
-                          console.log(vm.messages);
-                          vm.messages[contact.userId] = [];
-                      }
+                        if (!vm.messages.hasOwnProperty(contact.userId)) {
+                            console.log(vm.messages);
+                            vm.messages[contact.userId] = [];
+                        }
                     });
 
                     if (vm.contacts.length == 1) {

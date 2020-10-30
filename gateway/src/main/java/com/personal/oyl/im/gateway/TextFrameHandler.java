@@ -105,6 +105,19 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         System.out.println("Channel 【" + ctx.channel().id().asLongText() + "】 inactive...");
+
+        String currentId = connectionMgr.queryUserId(ctx.channel().id().asLongText());
+        for (String userId : connectionMgr.onlineUsers()) {
+            if (!userId.equalsIgnoreCase(currentId)) {
+                Protocol pro = new Protocol();
+                pro.setType(ProtocolType.offline);
+                pro.setMsgId(UUID.randomUUID().toString());
+                pro.setContent(currentId);
+
+                connectionMgr.queryChannel(userId).writeAndFlush(new TextWebSocketFrame(pro.toJson()));
+            }
+        }
+
         connectionMgr.channelDisconnected(ctx.channel());
         super.channelInactive(ctx);
     }

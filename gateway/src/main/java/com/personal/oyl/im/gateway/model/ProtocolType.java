@@ -11,6 +11,8 @@ public enum ProtocolType {
     connect_ack,
     online,
     online_ack,
+    offline,
+    offline_ack,
     business,
     business_ack;
 
@@ -29,6 +31,10 @@ public enum ProtocolType {
 
         if (ProtocolType.online.equals(this)) {
             return ProtocolType.online_ack;
+        }
+
+        if (ProtocolType.offline.equals(this)) {
+            return ProtocolType.offline_ack;
         }
 
         throw new IllegalArgumentException();
