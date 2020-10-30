@@ -12,12 +12,18 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author OuYang Liang
  * @since 2020-09-23
  */
+@Component
 public class WebsocketServer {
+
+    @Autowired
+    private RouteHandler routeHandler;
 
     public void bind(int port) throws InterruptedException {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -36,7 +42,7 @@ public class WebsocketServer {
                             ch.pipeline().addLast(new HttpRequestDecoder());
                             ch.pipeline().addLast(new HttpObjectAggregator(65535));
                             ch.pipeline().addLast(new ChunkedWriteHandler());
-                            ch.pipeline().addLast(new RouteHandler());
+                            ch.pipeline().addLast(routeHandler);
 //                            ch.pipeline().addLast(new WebsocketServerHandler());
 //                            ch.pipeline().addLast(new WebSocketServerProtocolHandler("/websocket"));
 //                            ch.pipeline().addLast(new TextFrameHandler());
@@ -58,6 +64,5 @@ public class WebsocketServer {
 
     public static void main(String[] args) throws InterruptedException {
         new WebsocketServer().bind(9080);
-
     }
 }

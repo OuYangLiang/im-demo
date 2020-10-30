@@ -1,10 +1,13 @@
 package com.personal.oyl.im.gateway;
 
 import com.personal.oyl.im.gateway.model.*;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.timeout.IdleStateEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
@@ -13,11 +16,14 @@ import java.util.UUID;
  * @author OuYang Liang
  * @since 2020-09-23
  */
+@Component
+@ChannelHandler.Sharable
 public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 
-    private static final ConnectionMgr connectionMgr = new ConnectionMgrImpl();
+    @Autowired
+    private ConnectionMgr connectionMgr;
 
-    public static void say(String id, String message) {
+    public void say(String id, String message) {
 
         Protocol protocol = new Protocol();
         protocol.setType(ProtocolType.business);
@@ -44,7 +50,7 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
 
             if (MessageType.text.equals(protocol.getSubType())) {
                 TextMessage message = TextMessage.fromJson(protocol.getContent());
-                TextFrameHandler.say(message.getReceiverId(), message.getContent());
+                say(message.getReceiverId(), message.getContent());
             }
 //            ctx.writeAndFlush(new TextWebSocketFrame(this.reply(ctx, protocol.getContent()).toJson()));
         }

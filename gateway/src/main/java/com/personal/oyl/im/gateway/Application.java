@@ -11,6 +11,5 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Application {
     public static void main(final String[] args) throws InterruptedException {
         SpringApplication.run(Application.class, args);
-        new WebsocketServer().bind(9080);
     }
 }

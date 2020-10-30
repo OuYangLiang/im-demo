@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<head>
+    <title>IM Demo Login</title>
+    <script src="vue.js"></script>
+    <script src="vue-resource.min.js"></script>
+    <style>
+        .login_box {
+            margin: auto;
+            margin-top: 350px;
+            width: 30%;
+            #border: 3px solid #0000CD;
+            padding: 10px;
+        }
+
+        input[type=text],
+        [type=password] {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            border: 2px solid black;
+            border-radius: 4px;
+        }
+
+        input[type=button] {
+            background-color: #555555;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            padding: 8px 64px;
+            text-decoration: none;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login_box" id="app">
+        <input type="text" v-model="userId" placeholder="Your Login Name" />
+        <input type="password" v-model="pwd" placeholder="Your Password" />
+        <input type="button" v-on:click="login" value="登录">
+    </div>
+
+    <script>
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                userId: '',
+                pwd: '',
+            },
+            methods: {
+                login: function(event) {
+                    this.$http.post("login", {
+                        userId: this.userId,
+                        pwd: this.pwd
+                    }, {
+                        emulateJSON: false
+                    }).then(function(res) {
+                        if (res.body.success) {
+                            window.location.href = "chat.html?" + this.userId + "|" + res.body.data;
+                        } else {
+                            alert(res.body.errMsg);
+                        }
+                    }, function(res) {
+
+                    })
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
