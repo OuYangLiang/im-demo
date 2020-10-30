@@ -6,187 +6,73 @@
     <title>IM Demo Login</title>
     <script src="vue.js"></script>
     <script src="vue-resource.min.js"></script>
-    <style>
-        .total_box {
-            margin: auto;
-            margin-top: 250px;
-            width: 850px;
-            border: 2px solid black;
-            border-radius: 4px;
-            padding: 10px;
-            height: 450px;
-        }
-
-        .contact_box {
-            float: left;
-            border: 2px solid black;
-            overflow: auto;
-            border-radius: 4px;
-            width: 250px;
-            height: 400px;
-            padding: 10px;
-        }
-
-        .contact {
-            border: 2px solid black;
-            border-radius: 4px;
-            margin: 5px 10px 0px 10px;
-            padding: 10px;
-        }
-
-        .chat_box {
-            float: right;
-            border: 2px solid black;
-            overflow: auto;
-            border-radius: 4px;
-            width: 550px;
-            height: 400px;
-            padding: 10px;
-        }
-
-        .chat_box .message_box_received_header,
-        .message_box_send_header {
-            margin: auto;
-            margin-top: 5px;
-            // border: 1px solid black;
-            width: 530px;
-            padding: 5px;
-        }
-
-        .chat_box .message_box_received_body,
-        .message_box_send_body {
-            margin: auto;
-            //border: 1px solid black;
-            width: 530px;
-            padding: 5px;
-        }
-
-        .chat_box .message_box_received_header .user {
-            float: left;
-            font: bold;
-        }
-
-        .chat_box .message_box_received_header .timestamp {
-            float: right;
-            color: #92a8d1;
-        }
-
-        .chat_box .message_box_received_body .avatar {
-            float: left;
-        }
-
-        .chat_box .message_box_received_body .content {
-            float: left;
-            border: 1px solid black;
-            margin-top: 10px;
-            padding-top: 0px;
-            width: 350px;
-            margin-bottom: 25px;
-        }
-
-        .chat_box .message_box_send_header .user {
-            float: right;
-            font: bold;
-        }
-
-        .chat_box .message_box_send_header .timestamp {
-            float: left;
-            color: #92a8d1;
-        }
-
-        .chat_box .message_box_send_body .avatar {
-            float: right;
-        }
-
-        .chat_box .message_box_send_body .content {
-            float: right;
-            border: 1px solid black;
-            margin-top: 10px;
-            padding-top: 0px;
-            width: 350px;
-        }
-
-        .clear_float {
-            clear: both;
-            #margin-top: 5px;
-        }
-
-        .icon {
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-        }
-    </style>
+    <link rel="stylesheet" href="chat.css">
 </head>
 
 <body>
 
     <div class="total_box" id="app">
         <div class="contact_box">
-            <div class="contact" v-for="contact of contacts">
-                {{contact}}
+            <div class="contact" v-bind:class="{ contact_active: contact.active }" v-for="contact of contacts">
+                {{contact.userId}}
             </div>
-            <div class="contact">
+            <!-- <div class="contact">
                 Lisa
             </div>
             <div class="contact">
                 Pig
-            </div>
+            </div> -->
         </div>
 
         <div class="chat_box">
-            <div class="message_box_received_header">
-                <div class="user">
-                    Alexander Pierce
+            <div v-for="message of currentMessages" >
+                <div class="message_box_received_header" v-if="message.direction == 'received'">
+                    <div class="user">
+                        {{message.receiverId}}
+                    </div>
+
+                    <div class="timestamp">
+                        {{message.timestamp}}
+                    </div>
+                </div>
+                <div class="message_box_send_header" v-else>
+                    <div class="user">
+                        {{message.senderId}}
+                    </div>
+
+                    <div class="timestamp">
+                        {{message.timestamp}}
+                    </div>
                 </div>
 
-                <div class="timestamp">
-                    23 Jan 2:00 pm
+                <div class="clear_float" ></div>
+
+                <div class="message_box_received_body" v-if="message.direction == 'received'">
+                    <div class="avatar">
+                        <img class="icon" src="user1-128x128.jpg" alt="message user image">
+                    </div>
+
+                    <div class="content">
+                        {{message.content}}
+                    </div>
                 </div>
+                <div class="message_box_send_body" v-else>
+                    <div class="avatar">
+                        <img class="icon" src="user3-128x128.jpg" alt="message user image">
+                    </div>
+
+                    <div class="content">
+                        {{message.content}}
+                    </div>
+                </div>
+
+                <div class="clear_float" ></div>
             </div>
+        </div>
 
-            <div class="clear_float" ></div>
-
-            <div class="message_box_received_body">
-                <div class="avatar">
-                    <img class="icon" src="user1-128x128.jpg" alt="message user image">
-                </div>
-
-                <div class="content">
-                    Working with AdminLTE on a great new app! Wanna join?
-                    Working with AdminLTE on a great new app! Wanna join?
-                </div>
-            </div>
-
-            <div class="clear_float" ></div>
-
-
-
-            <div class="message_box_send_header">
-                <div class="user">
-                    Alexander Pierce
-                </div>
-
-                <div class="timestamp">
-                    23 Jan 2:00 pm
-                </div>
-            </div>
-
-            <div class="clear_float" ></div>
-
-            <div class="message_box_send_body">
-                <div class="avatar">
-                    <img class="icon" src="user3-128x128.jpg" alt="message user image">
-                </div>
-
-                <div class="content">
-                    Working with AdminLTE on a great new app! Wanna join?
-                    Working with AdminLTE on a great new app! Wanna join?
-                </div>
-            </div>
-
-            <div class="clear_float" ></div>
-
+        <div class="send_box">
+            <input type="text" v-model="contentInput" placeholder="Please Input" />
+            <input type="button" v-on:click="send" value="发送">
         </div>
     </div>
 
@@ -211,7 +97,28 @@
                 userId: '',
                 sec: '',
 
+                contentInput: null,
                 contacts: [],
+                currentActive: null,
+                currentMessages: [],
+                messages: {"oyl":[
+                  {
+                    "direction": ["sent"],
+                    "senderId": "oyl",
+                    "receiverId": "oyl",
+                    "timestamp": "23 Jan 2:00 pm",
+                    "content": "Working with AdminLTE on a great new app! Wanna join?",
+                    "msgType": "text"
+                  },
+                  {
+                    "direction": ["received"],
+                    "senderId": "oyl",
+                    "receiverId": "oyl",
+                    "timestamp": "23 Jan 3:00 pm",
+                    "content": "Fuck you Fuck you",
+                    "msgType": "text"
+                  }
+                ]},
                 socket: null,
                 connected: false,
                 intervalId: null
@@ -251,11 +158,43 @@
                             return;
                         }
 
-                        vm.contacts = res.body.data;
+                        res.body.data.forEach(function(item, idx) {
+                            var obj = {};
+                            obj.userId = item;
+                            obj.active = false;
+                            vm.contacts.push(obj);
+                        });
+
+                        vm.contacts[0].active = true;
+                        vm.currentActive = vm.contacts[0];
+                        vm.currentMessages = vm.messages[vm.currentActive.userId];
 
                     }, function(res) {
                         console.log(res);
                     });
+                },
+                send: function() {
+                    var param = {};
+                    param.type = "business";
+                    param.subType = "text";
+                    param.content = {};
+                    param.content.senderId = this.userId;
+                    param.content.receiverId = this.currentActive.userId;
+                    param.content.content = this.contentInput;
+                    param.content = JSON.stringify(param.content);
+                    param.msgId = uuid();
+                    this.socket.send(JSON.stringify(param));
+
+                    param = {};
+                    param.direction = "sent";
+                    param.senderId = this.userId;
+                    param.receivered = this.currentActive.userId;
+                    param.timestamp = "xxx";
+                    param.type = "text";
+                    param.content = this.contentInput;
+
+                    //this.currentMessages.push(param);
+                    this.messages[vm.currentActive.userId].push(param);
                 },
                 connect: function() {
                     if(this.socket!=null) {

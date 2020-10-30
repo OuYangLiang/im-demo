@@ -32,9 +32,9 @@ public class DefaultController {
     @RequestMapping(value = "/login", method = {RequestMethod.POST})
     public WebResult<?> login(@RequestBody LoginParam param) {
 
-        if (!"OYL".equalsIgnoreCase(param.getUserId())) {
+        /*if (!"OYL".equalsIgnoreCase(param.getUserId())) {
             return WebResult.fail("Error001", "账号不存在");
-        }
+        }*/
 
         if (!"123".equalsIgnoreCase(param.getPwd())) {
             return WebResult.fail("Error002", "密码不正确");
