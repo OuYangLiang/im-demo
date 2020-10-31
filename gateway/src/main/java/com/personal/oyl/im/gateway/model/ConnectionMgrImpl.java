@@ -1,11 +1,13 @@
 package com.personal.oyl.im.gateway.model;
 
 import io.netty.channel.Channel;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -33,13 +35,35 @@ public class ConnectionMgrImpl implements ConnectionMgr {
     public void markConnected(String userId, Channel channel) {
         liveConns.put(channel.id().asLongText(), userId);
         channels.put(userId, channel);
+
+        for (String otherId : this.onlineUsers()) {
+            if (!otherId.equalsIgnoreCase(userId)) {
+                Protocol pro = new Protocol();
+                pro.setType(ProtocolType.online);
+                pro.setMsgId(UUID.randomUUID().toString());
+                pro.setContent(userId);
+
+                this.queryChannel(otherId).writeAndFlush(new TextWebSocketFrame(pro.toJson()));
+            }
+        }
     }
 
     @Override
     public void channelDisconnected(Channel channel) {
-        String userId = liveConns.get(channel.id().asLongText());
+        String currentId = liveConns.get(channel.id().asLongText());
         liveConns.remove(channel.id().asLongText());
-        channels.remove(userId);
+        channels.remove(currentId);
+
+        for (String userId : this.onlineUsers()) {
+            if (!userId.equalsIgnoreCase(currentId)) {
+                Protocol pro = new Protocol();
+                pro.setType(ProtocolType.offline);
+                pro.setMsgId(UUID.randomUUID().toString());
+                pro.setContent(currentId);
+
+                this.queryChannel(userId).writeAndFlush(new TextWebSocketFrame(pro.toJson()));
+            }
+        }
     }
 
     @Override

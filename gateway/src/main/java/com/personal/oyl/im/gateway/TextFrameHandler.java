@@ -45,19 +45,6 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
         } else if (ProtocolType.connect.equals(protocol.getType())) {
             connectionMgr.markConnected(protocol.getContent(), ctx.channel());
             ctx.writeAndFlush(new TextWebSocketFrame(protocol.toAck().toJson()));
-
-
-            for (String userId : connectionMgr.onlineUsers()) {
-                if (!userId.equalsIgnoreCase(protocol.getContent())) {
-                    Protocol pro = new Protocol();
-                    pro.setType(ProtocolType.online);
-                    pro.setMsgId(UUID.randomUUID().toString());
-                    pro.setContent(protocol.getContent());
-
-                    connectionMgr.queryChannel(userId).writeAndFlush(new TextWebSocketFrame(pro.toJson()));
-                }
-            }
-
         } else if (ProtocolType.business.equals(protocol.getType())) {
             ctx.writeAndFlush(new TextWebSocketFrame(protocol.toAck().toJson()));
 
@@ -104,20 +91,6 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("Channel 【" + ctx.channel().id().asLongText() + "】 inactive...");
-
-        String currentId = connectionMgr.queryUserId(ctx.channel().id().asLongText());
-        for (String userId : connectionMgr.onlineUsers()) {
-            if (!userId.equalsIgnoreCase(currentId)) {
-                Protocol pro = new Protocol();
-                pro.setType(ProtocolType.offline);
-                pro.setMsgId(UUID.randomUUID().toString());
-                pro.setContent(currentId);
-
-                connectionMgr.queryChannel(userId).writeAndFlush(new TextWebSocketFrame(pro.toJson()));
-            }
-        }
-
         connectionMgr.channelDisconnected(ctx.channel());
         super.channelInactive(ctx);
     }
