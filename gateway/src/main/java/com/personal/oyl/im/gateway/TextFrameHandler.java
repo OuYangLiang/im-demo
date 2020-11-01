@@ -23,16 +23,8 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
     @Autowired
     private ConnectionMgr connectionMgr;
 
-    public void say(String id, String message) {
-
-        Protocol protocol = new Protocol();
-        protocol.setType(ProtocolType.business);
-        protocol.setMsgId(UUID.randomUUID().toString());
-        protocol.setSubType(MessageType.text);
-        protocol.setContent(message);
-
-        connectionMgr.queryChannel(id).writeAndFlush(new TextWebSocketFrame(protocol.toJson()));
-    }
+    @Autowired
+    private ImService imService;
 
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, TextWebSocketFrame msg) {
@@ -50,14 +42,8 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
 
             if (MessageType.text.equals(protocol.getSubType())) {
                 TextMessage message = TextMessage.fromJson(protocol.getContent());
-
-                TextMessage reply = new TextMessage();
-                reply.setSenderId(message.getSenderId());
-                reply.setReceiverId(message.getReceiverId());
-                reply.setContent(message.getContent());
-                say(message.getReceiverId(), reply.json());
+                imService.onTextMessage(message);
             }
-//            ctx.writeAndFlush(new TextWebSocketFrame(this.reply(ctx, protocol.getContent()).toJson()));
         }
     }
 

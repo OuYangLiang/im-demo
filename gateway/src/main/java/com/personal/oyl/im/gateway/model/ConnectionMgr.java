@@ -14,4 +14,6 @@ public interface ConnectionMgr {
     void channelDisconnected(Channel channel);
 
     List<String> onlineUsers();
+
+    void sendTextMessage(String userFrom, String userTo, String message);
 }

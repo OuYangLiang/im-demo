@@ -70,4 +70,21 @@ public class ConnectionMgrImpl implements ConnectionMgr {
     public List<String> onlineUsers() {
         return new ArrayList<>(channels.keySet());
     }
+
+    @Override
+    public void sendTextMessage(String userFrom, String userTo, String message) {
+        TextMessage param = new TextMessage();
+
+        param.setSenderId(userFrom);
+        param.setReceiverId(userTo);
+        param.setContent(message);
+
+        Protocol protocol = new Protocol();
+        protocol.setType(ProtocolType.business);
+        protocol.setMsgId(UUID.randomUUID().toString());
+        protocol.setSubType(MessageType.text);
+        protocol.setContent(param.json());
+
+        this.queryChannel(userTo).writeAndFlush(new TextWebSocketFrame(protocol.toJson()));
+    }
 }
