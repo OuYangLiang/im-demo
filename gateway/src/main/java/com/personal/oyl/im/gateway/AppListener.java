@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class AppListener implements ApplicationListener<ContextRefreshedEvent>  {
 
-    @Autowired
     private WebsocketServer websocketServer;
 
     @Override
@@ -28,5 +27,10 @@ public class AppListener implements ApplicationListener<ContextRefreshedEvent>  
                     }
             ).start();
         }
+    }
+
+    @Autowired
+    public void setWebsocketServer(WebsocketServer websocketServer) {
+        this.websocketServer = websocketServer;
     }
 }

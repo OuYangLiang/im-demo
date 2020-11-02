@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * @author OuYang Liang
@@ -36,6 +35,7 @@ public class ConnectionMgrImpl implements ConnectionMgr {
         liveConns.put(channel.id().asLongText(), userId);
         channels.put(userId, channel);
 
+        // 异步
         for (String otherId : this.onlineUsers()) {
             if (!otherId.equalsIgnoreCase(userId)) {
                 Protocol pro = new Protocol();

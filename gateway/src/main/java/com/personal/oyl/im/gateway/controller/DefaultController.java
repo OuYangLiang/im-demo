@@ -21,7 +21,6 @@ public class DefaultController {
 
     private static Map<String, String> check = new ConcurrentHashMap<>();
 
-    @Autowired
     private ConnectionMgr connectionMgr;
 
     @RequestMapping("/hello")
@@ -62,5 +61,10 @@ public class DefaultController {
     @RequestMapping("/onlineUsers")
     public WebResult<List<String>> onlineUsers() {
         return WebResult.success(connectionMgr.onlineUsers());
+    }
+
+    @Autowired
+    public void setConnectionMgr(ConnectionMgr connectionMgr) {
+        this.connectionMgr = connectionMgr;
     }
 }

@@ -10,6 +10,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class WebsocketServer {
 
-    @Autowired
-    private RouteHandler routeHandler;
+    private TextFrameHandler textFrameHandler;
 
     public void bind(int port) throws InterruptedException {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -42,14 +42,8 @@ public class WebsocketServer {
                             ch.pipeline().addLast(new HttpRequestDecoder());
                             ch.pipeline().addLast(new HttpObjectAggregator(65535));
                             ch.pipeline().addLast(new ChunkedWriteHandler());
-                            ch.pipeline().addLast(routeHandler);
-//                            ch.pipeline().addLast(new WebsocketServerHandler());
-//                            ch.pipeline().addLast(new WebSocketServerProtocolHandler("/websocket"));
-//                            ch.pipeline().addLast(new TextFrameHandler());
-
-//                            ch.pipeline().addLast(new BinaryFrameHandler());
-//                            ch.pipeline().addLast(new ContinuationFrameHandler());
-
+                            ch.pipeline().addLast(new WebSocketServerProtocolHandler("/websocket"));
+                            ch.pipeline().addLast(textFrameHandler);
                         }
                     });
 
@@ -62,7 +56,12 @@ public class WebsocketServer {
         }
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        new WebsocketServer().bind(9080);
+    @Autowired
+    public void setTextFrameHandler(TextFrameHandler textFrameHandler) {
+        this.textFrameHandler = textFrameHandler;
     }
+
+    /*public static void main(String[] args) throws InterruptedException {
+        new WebsocketServer().bind(9080);
+    }*/
 }

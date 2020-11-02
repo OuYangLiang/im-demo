@@ -20,10 +20,8 @@ import java.util.UUID;
 @ChannelHandler.Sharable
 public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 
-    @Autowired
-    private ConnectionMgr connectionMgr;
 
-    @Autowired
+    private ConnectionMgr connectionMgr;
     private ImService imService;
 
     @Override
@@ -79,5 +77,15 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         connectionMgr.channelDisconnected(ctx.channel());
         super.channelInactive(ctx);
+    }
+
+    @Autowired
+    public void setConnectionMgr(ConnectionMgr connectionMgr) {
+        this.connectionMgr = connectionMgr;
+    }
+
+    @Autowired
+    public void setImService(ImService imService) {
+        this.imService = imService;
     }
 }

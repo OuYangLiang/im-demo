@@ -10,11 +10,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class ImServiceImpl implements ImService {
 
-    @Autowired
     private ConnectionMgr connectionMgr;
 
     @Override
     public void onTextMessage(TextMessage textMessage) {
         connectionMgr.sendTextMessage(textMessage.getSenderId(), textMessage.getReceiverId(), textMessage.getContent());
+    }
+
+    @Autowired
+    public void setConnectionMgr(ConnectionMgr connectionMgr) {
+        this.connectionMgr = connectionMgr;
     }
 }
