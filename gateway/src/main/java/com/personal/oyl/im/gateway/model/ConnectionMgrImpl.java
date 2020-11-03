@@ -2,6 +2,7 @@ package com.personal.oyl.im.gateway.model;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -19,6 +20,8 @@ public class ConnectionMgrImpl implements ConnectionMgr {
 
     private static final Map<String, String> liveConns = new ConcurrentHashMap<>();
     private static final Map<String, Channel> channels = new ConcurrentHashMap<>();
+
+    private SendWrapper sendWrapper;
 
     @Override
     public String queryUserId(String channelId) {
@@ -43,7 +46,8 @@ public class ConnectionMgrImpl implements ConnectionMgr {
                 pro.setMsgId(UUID.randomUUID().toString());
                 pro.setContent(userId);
 
-                this.queryChannel(otherId).writeAndFlush(new TextWebSocketFrame(pro.toJson()));
+                //this.queryChannel(otherId).writeAndFlush(new TextWebSocketFrame(pro.toJson()));
+                this.sendWrapper.send(this.queryChannel(otherId), pro);
             }
         }
     }
@@ -61,7 +65,8 @@ public class ConnectionMgrImpl implements ConnectionMgr {
                 pro.setMsgId(UUID.randomUUID().toString());
                 pro.setContent(currentId);
 
-                this.queryChannel(userId).writeAndFlush(new TextWebSocketFrame(pro.toJson()));
+                //this.queryChannel(userId).writeAndFlush(new TextWebSocketFrame(pro.toJson()));
+                this.sendWrapper.send(this.queryChannel(userId), pro);
             }
         }
     }
@@ -85,6 +90,12 @@ public class ConnectionMgrImpl implements ConnectionMgr {
         protocol.setSubType(MessageType.text);
         protocol.setContent(param.json());
 
-        this.queryChannel(userTo).writeAndFlush(new TextWebSocketFrame(protocol.toJson()));
+        //this.queryChannel(userTo).writeAndFlush(new TextWebSocketFrame(protocol.toJson()));
+        this.sendWrapper.send(this.queryChannel(userTo), protocol);
+    }
+
+    @Autowired
+    public void setSendWrapper(SendWrapper sendWrapper) {
+        this.sendWrapper = sendWrapper;
     }
 }

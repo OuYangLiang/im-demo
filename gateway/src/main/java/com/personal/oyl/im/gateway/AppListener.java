@@ -1,5 +1,6 @@
 package com.personal.oyl.im.gateway;
 
+import com.personal.oyl.im.gateway.model.SendWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 public class AppListener implements ApplicationListener<ContextRefreshedEvent>  {
 
     private WebsocketServer websocketServer;
+    private SendWrapper sendWrapper;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -26,11 +28,22 @@ public class AppListener implements ApplicationListener<ContextRefreshedEvent>  
                         }
                     }
             ).start();
+
+            sendWrapper.start();
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() ->  {
+                sendWrapper.stop();
+            }));
         }
     }
 
     @Autowired
     public void setWebsocketServer(WebsocketServer websocketServer) {
         this.websocketServer = websocketServer;
+    }
+
+    @Autowired
+    public void setSendWrapper(SendWrapper sendWrapper) {
+        this.sendWrapper = sendWrapper;
     }
 }

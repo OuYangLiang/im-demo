@@ -23,6 +23,7 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
 
     private ConnectionMgr connectionMgr;
     private ImService imService;
+    private SendWrapper sendWrapper;
 
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, TextWebSocketFrame msg) {
@@ -35,6 +36,12 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
         } else if (ProtocolType.connect.equals(protocol.getType())) {
             connectionMgr.markConnected(protocol.getContent(), ctx.channel());
             ctx.writeAndFlush(new TextWebSocketFrame(protocol.toAck().toJson()));
+        } else if (ProtocolType.online_ack.equals(protocol.getType())) {
+            sendWrapper.clear(protocol.getMsgId());
+        } else if (ProtocolType.offline_ack.equals(protocol.getType())) {
+            sendWrapper.clear(protocol.getMsgId());
+        } else if (ProtocolType.business_ack.equals(protocol.getType())) {
+            sendWrapper.clear(protocol.getMsgId());
         } else if (ProtocolType.business.equals(protocol.getType())) {
             ctx.writeAndFlush(new TextWebSocketFrame(protocol.toAck().toJson()));
 
@@ -87,5 +94,10 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
     @Autowired
     public void setImService(ImService imService) {
         this.imService = imService;
+    }
+
+    @Autowired
+    public void setSendWrapper(SendWrapper sendWrapper) {
+        this.sendWrapper = sendWrapper;
     }
 }

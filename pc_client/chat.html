@@ -182,7 +182,7 @@
                         this.socket = null;
                     }
 
-                    this.socket = new WebSocket("ws://localhost:9080/webSocket");
+                    this.socket = new WebSocket("ws://" + window.location.host + ":9080/webSocket");
 
                     this.socket.onopen = function() {
                         var param = {};
@@ -221,6 +221,11 @@
                             obj.active = false;
                             vm.contacts.push(obj);
 
+                            var param = {};
+                            param.type = "online_ack";
+                            param.msgId = data.msgId;
+                            vm.socket.send(JSON.stringify(param));
+
                             return;
                         }
 
@@ -230,6 +235,11 @@
                                     vm.contacts.splice(i,1);
                                 }
                             }
+
+                            var param = {};
+                            param.type = "offline_ack";
+                            param.msgId = data.msgId;
+                            vm.socket.send(JSON.stringify(param));
 
                             return;
                         }
@@ -247,6 +257,11 @@
                             //this.currentMessages.push(param);
                             console.log(datacontent);
                             vm.messages[datacontent.senderId].push(param);
+
+                            var param = {};
+                            param.type = "business_ack";
+                            param.msgId = data.msgId;
+                            vm.socket.send(JSON.stringify(param));
                         }
                     };
 
