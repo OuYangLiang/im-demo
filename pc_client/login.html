@@ -41,8 +41,8 @@
 <body>
 
     <div class="login_box" id="app">
-        <input type="text" v-model="userId" placeholder="Your Login Name" />
-        <input type="password" v-model="pwd" placeholder="Your Password" />
+        <input type="text" v-model="userId" placeholder="Your Login Name" v-on:keyup.enter="login" />
+        <input type="password" v-model="pwd" placeholder="Your Password" v-on:keyup.enter="login" />
         <input type="button" v-on:click="login" value="登录">
     </div>
 
@@ -55,6 +55,17 @@
             },
             methods: {
                 login: function(event) {
+
+                    if ('' == this.userId.trim()) {
+                        alert("Please input your user ID");
+                        return;
+                    }
+
+                    if ('' == this.pwd.trim()) {
+                        alert("Please input your password");
+                        return;
+                    }
+
                     this.$http.post("login", {
                         userId: this.userId,
                         pwd: this.pwd

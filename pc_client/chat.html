@@ -71,7 +71,7 @@
         </div>
 
         <div class="send_box">
-            <input type="text" v-model="contentInput" placeholder="Please Input" />
+            <input type="text" v-model="contentInput" placeholder="Please Input" v-on:keyup.enter="send" />
             <input type="button" v-on:click="send" value="发送">
         </div>
     </div>
@@ -153,6 +153,14 @@
                     });
                 },
                 send: function() {
+                    if ('' == this.contentInput.trim()) {
+                        return;
+                    }
+
+                    if (!vm.connected) {
+                        alert("Your network is not connected, please check it first.");
+                    }
+
                     var param = {};
                     param.type = "business";
                     param.subType = "text";
@@ -267,6 +275,7 @@
 
                     this.socket.onclose = function() {
                         clearInterval(vm.intervalId);
+                        vm.connected = false;
                         alert("websocket已关闭");
                     };
 

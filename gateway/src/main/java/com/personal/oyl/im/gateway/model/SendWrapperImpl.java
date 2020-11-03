@@ -24,9 +24,8 @@ public class SendWrapperImpl implements SendWrapper {
 
     public void send(Channel channel, Protocol protocol) {
         String content = protocol.toJson();
-        channel.writeAndFlush(new TextWebSocketFrame(content));
-
         SendCommand command = new SendCommand(protocol.getMsgId(), channel, content, Command.delay, Command.unit);
+        command.execute();
         queue.offer(command);
     }
 
