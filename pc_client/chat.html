@@ -13,7 +13,7 @@
 
     <div class="total_box" id="app">
         <div class="contact_box">
-            <div class="contact" v-bind:class="{ contact_active: contact.active }" v-for="contact of contacts">
+            <div class="contact" v-bind:class="{ contact_active: contact.active }" v-for="contact of contacts" v-on:click="switchContact(contact.userId)">
                 {{contact.userId}}
             </div>
             <!-- <div class="contact">
@@ -99,7 +99,7 @@
 
                 contentInput: null,
                 contacts: [],
-                currentActive: null,
+                currentActive: null, // cache
                 currentMessages: [],
                 messages: {},
                 socket: null,
@@ -134,6 +134,19 @@
                         console.log(res);
                     });
                 },
+                switchContact: function(userId) {
+                    vm.contacts.forEach(function(contact) {
+                        if (contact.active) {
+                            contact.active = false;
+                        }
+
+                        if (contact.userId == userId) {
+                            contact.active = true;
+                            vm.currentActive = contact;
+                            vm.currentMessages = vm.messages[userId];
+                        }
+                    });
+                },
                 initContactList: function() {
                     this.$http.post("onlineUsers", {userId: this.userId}, {emulateJSON: false}).then(function(res) {
                         if (!res.body.success) {
@@ -164,12 +177,13 @@
                     var param = {};
                     param.type = "business";
                     param.subType = "text";
+                    param.msgId = uuid();
                     param.content = {};
                     param.content.senderId = this.userId;
                     param.content.receiverId = this.currentActive.userId;
                     param.content.content = this.contentInput;
                     param.content = JSON.stringify(param.content);
-                    param.msgId = uuid();
+
                     this.socket.send(JSON.stringify(param));
 
                     param = {};
@@ -293,7 +307,7 @@
                         }
                     });
 
-                    if (vm.contacts.length == 1) {
+                    if (null == vm.currentActive && vm.contacts.length > 0) {
                         vm.contacts[0].active = true;
                         vm.currentActive = vm.contacts[0];
                         vm.currentMessages = vm.messages[vm.currentActive.userId];
