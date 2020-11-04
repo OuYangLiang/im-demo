@@ -2,7 +2,7 @@
   margin: auto;
   margin-top: 250px;
   width: 850px;
-  border: 2px solid black;
+  //border: 2px solid black;
   border-radius: 4px;
   padding: 10px;
   height: 550px;
@@ -31,17 +31,17 @@
 
 .send_box {
   float: right;
-  margin-top: 10px;
+  margin-top: 5px;
   //border: 2px solid black;
   border-radius: 4px;
-  width: 550px;
+  width: 573px;
   height: 50px;
-  padding: 10px;
+  //padding: 10px;
 }
 
 input[type=text] {
-  width: 87%;
-  padding: 12px 20px;
+  width: 89%;
+  padding: 18px 20px;
   //margin: 8px 0;
   box-sizing: border-box;
   border: 2px solid black;
@@ -53,7 +53,7 @@ input[type=button] {
   border: none;
   border-radius: 6px;
   color: white;
-  padding: 8px 12px;
+  padding: 16px 12px;
   text-decoration: none;
   margin: 2px 2px;
   cursor: pointer;
