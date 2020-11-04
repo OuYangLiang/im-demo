@@ -102,9 +102,12 @@ input[type=button] {
 
 .chat_box .message_box_received_body .content {
   float: left;
+  background: #dddddd;
   border: 1px solid black;
+  border-radius: 8px;
   margin-top: 10px;
-  padding-top: 0px;
+  margin-left: 10px;
+  padding: 7px;
   width: 350px;
   margin-bottom: 25px;
 }
@@ -125,9 +128,12 @@ input[type=button] {
 
 .chat_box .message_box_send_body .content {
   float: right;
+  background: #00dd00;
   border: 1px solid black;
+  border-radius: 8px;
   margin-top: 10px;
-  padding-top: 0px;
+  margin-right: 10px;
+  padding: 7px;
   width: 350px;
 }
 

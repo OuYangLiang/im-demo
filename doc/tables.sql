@@ -5,7 +5,7 @@ create table if not exists `message` (
   `type`            tinyint       not null comment '消息类型',
   `status`          tinyint       not null comment '消息状态: 0->初始，1->已投递，2->已读',
   `content`         varchar(255)  not null comment '消息内容',
-  `created_time`    datetime      not null default current timestamp comment '创建时间',
-  primary key (`id`),
-  unique key(`event_id`)
-) engine=innodb default charset=utf8 comment='消息表';
+  `created_time`    datetime      not null default current_timestamp comment '创建时间',
+  `read_time`       datetime      not null default current_timestamp comment '已读时间',
+  primary key (`id`)
+) engine=innodb default charset=utf8mb4 comment='消息表';
