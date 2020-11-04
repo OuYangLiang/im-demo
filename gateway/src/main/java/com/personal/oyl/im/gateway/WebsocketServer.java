@@ -37,7 +37,7 @@ public class WebsocketServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) {
-                            ch.pipeline().addLast(new IdleStateHandler(0,0,60));
+                            ch.pipeline().addLast(new IdleStateHandler(0,0,60000));
                             ch.pipeline().addLast(new HttpResponseEncoder());
                             ch.pipeline().addLast(new HttpRequestDecoder());
                             ch.pipeline().addLast(new HttpObjectAggregator(65535));

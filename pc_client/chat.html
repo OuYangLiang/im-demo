@@ -104,7 +104,8 @@
                 messages: {},
                 socket: null,
                 connected: false,
-                intervalId: null
+                intervalId: null,
+                retryIds: new Set()
             },
             methods: {
                 validate: function() {
@@ -165,6 +166,23 @@
                         console.log(res);
                     });
                 },
+                doSend: function(firstTime, msgId, content) {
+                    if (firstTime) {
+                        vm.socket.send(content);
+                        vm.retryIds.add(msgId);
+
+                        setTimeout(() => {
+                            vm.doSend(false, msgId, content);
+                        }, 5000);
+                    } else {
+                        if (vm.retryIds.has(msgId)) {
+                            vm.socket.send(content);
+                            setTimeout(() => {
+                                vm.doSend(false, msgId, content);
+                            }, 5000);
+                        }
+                    }
+                },
                 send: function() {
                     if ('' == this.contentInput.trim()) {
                         return;
@@ -184,7 +202,8 @@
                     param.content.content = this.contentInput;
                     param.content = JSON.stringify(param.content);
 
-                    this.socket.send(JSON.stringify(param));
+                    //this.socket.send(JSON.stringify(param));
+                    this.doSend(true, param.msgId, JSON.stringify(param));
 
                     param = {};
                     param.direction = "sent";
@@ -233,7 +252,12 @@
                             return;
                         }
 
-                        if (data.type=="heartbeat_ack" || data.type=="business_ack") {
+                        if (data.type=="heartbeat_ack") {
+                            return;
+                        }
+
+                        if (data.type=="business_ack") {
+                            vm.retryIds.delete(data.msgId);
                             return;
                         }
 
