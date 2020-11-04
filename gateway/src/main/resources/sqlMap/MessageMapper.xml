@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.personal.oyl.im.gateway.model.MessageMapper">
+	<resultMap id="BaseResultMap" type="com.personal.oyl.im.gateway.model.Message">
+        <result column="id" property="id" jdbcType="BIGINT" />
+        <result column="sender" property="sender" jdbcType="VARCHAR" />
+        <result column="receiver" property="receiver" jdbcType="VARCHAR" />
+        <result column="type" property="type" typeHandler="com.personal.oyl.im.gateway.model.MessageTypeHandler" />
+        <result column="status" property="status" typeHandler="com.personal.oyl.im.gateway.model.MessageStatusHandler" />
+        <result column="content" property="content" jdbcType="VARCHAR" />
+        <result column="created_time" property="createdTime" jdbcType="TIMESTAMP" />
+        <result column="read_time" property="readTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+
+	<sql id="Base_Column_List">
+        `id`, `sender`, `receiver`, `type`, `status`, `content`, `created_time`, `read_time`
+	</sql>
+  
+    <insert id="insert">
+        insert into `message`(
+            `sender`, `receiver`, `type`, `status`, `content`
+        ) values (
+            #{param1,jdbcType=VARCHAR},
+            #{param2,jdbcType=VARCHAR},
+            #{param3,typeHandler=com.personal.oyl.im.gateway.model.MessageTypeHandler},
+            0,
+            #{param4,jdbcType=VARCHAR}
+        )
+    </insert>
+
+
+</mapper>

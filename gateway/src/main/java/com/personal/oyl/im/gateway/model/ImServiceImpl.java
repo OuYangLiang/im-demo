@@ -11,14 +11,21 @@ import org.springframework.stereotype.Component;
 public class ImServiceImpl implements ImService {
 
     private ConnectionMgr connectionMgr;
+    private MessageMapper  messageMapper;
 
     @Override
     public void onTextMessage(TextMessage textMessage) {
+        messageMapper.insert(textMessage.getSenderId(), textMessage.getReceiverId(), MessageType.text, textMessage.getContent());
         connectionMgr.sendTextMessage(textMessage.getSenderId(), textMessage.getReceiverId(), textMessage.getContent());
     }
 
     @Autowired
     public void setConnectionMgr(ConnectionMgr connectionMgr) {
         this.connectionMgr = connectionMgr;
+    }
+
+    @Autowired
+    public void setMessageMapper(MessageMapper messageMapper) {
+        this.messageMapper = messageMapper;
     }
 }
