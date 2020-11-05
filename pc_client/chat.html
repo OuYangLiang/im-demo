@@ -148,6 +148,45 @@
                         }
                     });
                 },
+                initChat: function(targetId) {
+                    this.$http.post("queryChat", {loginId1: vm.loginId, loginId2: targetId, n: 20}, {emulateJSON: false}).then(function(res) {
+                        if (!res.body.success) {
+                            return;
+                        }
+
+                        res.body.data.forEach(function(item, idx) {
+                            console.log(item);
+                            if (item.type=="business" && item.subType =="text") {
+                                var datacontent = JSON.parse(item.content);
+
+                                if (datacontent.senderId == vm.loginId) {
+                                    var param = {};
+                                    param.direction = "sent";
+                                    param.senderId = this.loginId;
+                                    param.receivered = targetId;
+                                    param.timestamp = "xxx";
+                                    param.type = "text";
+                                    param.content = datacontent.content;
+
+                                    vm.messages[targetId].push(param);
+                                } else {
+                                    var param = {};
+                                    param.direction = "received";
+                                    param.senderId = targetId;
+                                    param.receiverId = vm.loginId;
+                                    param.timestamp = "xxx";
+                                    param.type = "text";
+                                    param.content = datacontent.content;
+
+                                    vm.messages[datacontent.senderId].push(param);
+                                }
+                            }
+
+                        });
+                    }, function(res) {
+                        console.log(res);
+                    });
+                },
                 initContactList: function() {
                     this.$http.post("queryFriends", {loginId: this.loginId}, {emulateJSON: false}).then(function(res) {
                         if (!res.body.success) {
@@ -155,12 +194,16 @@
                         }
 
                         res.body.data.forEach(function(item, idx) {
-                              var obj = {};
-                              obj.loginId = item.loginId;
-                              obj.userName = item.userName;
-                              obj.icon = item.icon;
-                              obj.active = false;
-                              vm.contacts.push(obj);
+                            var obj = {};
+                            obj.loginId = item.loginId;
+                            obj.userName = item.userName;
+                            obj.icon = item.icon;
+                            obj.active = false;
+                            vm.contacts.push(obj);
+                        });
+
+                        vm.contacts.forEach(function(item, idx) {
+                            vm.initChat(item.loginId);
                         });
                     }, function(res) {
                         console.log(res);

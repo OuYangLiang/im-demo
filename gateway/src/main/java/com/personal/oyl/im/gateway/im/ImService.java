@@ -1,6 +1,9 @@
 package com.personal.oyl.im.gateway.im;
 
+import com.personal.oyl.im.gateway.model.Protocol;
 import com.personal.oyl.im.gateway.model.TextMessage;
+
+import java.util.List;
 
 /**
  * @author OuYang Liang
@@ -8,4 +11,6 @@ import com.personal.oyl.im.gateway.model.TextMessage;
  */
 public interface ImService {
     void onTextMessage(TextMessage textMessage);
+
+    List<Protocol> queryLastN(String loginId1, String loginId2, int n);
 }

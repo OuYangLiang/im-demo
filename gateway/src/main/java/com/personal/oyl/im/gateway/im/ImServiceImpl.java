@@ -1,9 +1,15 @@
 package com.personal.oyl.im.gateway.im;
 
 import com.personal.oyl.im.gateway.model.ConnectionMgr;
+import com.personal.oyl.im.gateway.model.Protocol;
+import com.personal.oyl.im.gateway.model.ProtocolType;
 import com.personal.oyl.im.gateway.model.TextMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author OuYang Liang
@@ -17,8 +23,30 @@ public class ImServiceImpl implements ImService {
 
     @Override
     public void onTextMessage(TextMessage textMessage) {
-        messageMapper.insert(textMessage.getSenderId(), textMessage.getReceiverId(), MessageType.text, textMessage.getContent());
+        messageMapper.insert(textMessage.getSenderId(), textMessage.getReceiverId(), this.identification(textMessage.getSenderId(), textMessage.getReceiverId()), MessageType.text, textMessage.getContent());
         connectionMgr.sendTextMessage(textMessage.getSenderId(), textMessage.getReceiverId(), textMessage.getContent());
+    }
+
+    private String identification(String s1, String s2) {
+        return (s1.compareTo(s2) > 0) ? s1 + "|" + s2 : s2 + "|" + s1;
+    }
+
+    @Override
+    public List<Protocol> queryLastN(String senderId, String receiverId, int n) {
+        List<Message> messages = messageMapper.queryLastN(this.identification(senderId, receiverId), n);
+
+        if (null == messages || messages.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return messages.stream().map((m) -> {
+            Protocol pro = new Protocol();
+            pro.setType(ProtocolType.business);
+            pro.setSubType(m.getType());
+            pro.setMsgId(null); // TODO
+            pro.setContent(TextMessage.from(m).json());
+            return pro;
+        }).collect(Collectors.toList());
     }
 
     @Autowired

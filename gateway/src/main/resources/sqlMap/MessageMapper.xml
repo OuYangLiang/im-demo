@@ -12,22 +12,29 @@
         <result column="read_time" property="readTime" jdbcType="TIMESTAMP" />
 	</resultMap>
 
-
-	<sql id="Base_Column_List">
-        `id`, `sender`, `receiver`, `type`, `status`, `content`, `created_time`, `read_time`
-	</sql>
-  
     <insert id="insert">
         insert into `message`(
-            `sender`, `receiver`, `type`, `status`, `content`
+            `sender`, `receiver`, `Identification`, `type`, `status`, `content`
         ) values (
             #{param1,jdbcType=VARCHAR},
             #{param2,jdbcType=VARCHAR},
-            #{param3,typeHandler=com.personal.oyl.im.gateway.im.MessageTypeHandler},
+            #{param3,jdbcType=VARCHAR},
+            #{param4,typeHandler=com.personal.oyl.im.gateway.im.MessageTypeHandler},
             0,
-            #{param4,jdbcType=VARCHAR}
+            #{param5,jdbcType=VARCHAR}
         )
     </insert>
 
+    <select id="queryLastN" resultMap="BaseResultMap">
+        select a.`id`, a.`sender`, a.`receiver`, a.`type`, a.`status`, a.`content`, a.`created_time`, a.`read_time`
+        from `message` a,
+        (select `id` from `message`
+            where `identification` = #{param1,jdbcType=VARCHAR}
+            order by `id` desc
+            limit ${param2}) b
+        where a.`id` = b.`id`
+        order by a.`id` asc
+
+    </select>
 
 </mapper>

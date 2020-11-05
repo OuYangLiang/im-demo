@@ -1,6 +1,9 @@
 package com.personal.oyl.im.gateway.controller;
 
+import com.personal.oyl.im.gateway.im.ImService;
 import com.personal.oyl.im.gateway.model.ConnectionMgr;
+import com.personal.oyl.im.gateway.model.Protocol;
+import com.personal.oyl.im.gateway.model.TextMessage;
 import com.personal.oyl.im.gateway.user.User;
 import com.personal.oyl.im.gateway.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +30,7 @@ public class DefaultController {
 
     private ConnectionMgr connectionMgr;
     private UserService userService;
+    private ImService imService;
 
     @RequestMapping("/hello")
     public String hello() {
@@ -78,6 +82,11 @@ public class DefaultController {
         return WebResult.success(users.stream().map(UserDto::from).collect(Collectors.toList()));
     }
 
+    @RequestMapping("/queryChat")
+    public WebResult<List<Protocol>> queryChat(@RequestBody ChatQueryParam param) {
+        return WebResult.success(imService.queryLastN(param.getLoginId1(), param.getLoginId2(), param.getN()));
+    }
+
     @Autowired
     public void setConnectionMgr(ConnectionMgr connectionMgr) {
         this.connectionMgr = connectionMgr;
@@ -86,5 +95,10 @@ public class DefaultController {
     @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;
+    }
+
+    @Autowired
+    public void setImService(ImService imService) {
+        this.imService = imService;
     }
 }

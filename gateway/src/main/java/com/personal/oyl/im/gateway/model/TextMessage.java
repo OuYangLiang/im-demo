@@ -2,6 +2,7 @@ package com.personal.oyl.im.gateway.model;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.personal.oyl.im.gateway.im.Message;
 
 /**
  * @author OuYang Liang
@@ -44,5 +45,14 @@ public class TextMessage {
 
     public static TextMessage fromJson(String json) {
         return gson.fromJson(json, TextMessage.class);
+    }
+
+    public static TextMessage from(Message message) {
+        TextMessage rlt = new TextMessage();
+        rlt.setSenderId(message.getSender());
+        rlt.setReceiverId(message.getReceiver());
+        rlt.setContent(message.getContent());
+
+        return rlt;
     }
 }
