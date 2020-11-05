@@ -23,8 +23,15 @@ public class ImServiceImpl implements ImService {
 
     @Override
     public void onTextMessage(TextMessage textMessage) {
-        messageMapper.insert(textMessage.getSenderId(), textMessage.getReceiverId(), this.identification(textMessage.getSenderId(), textMessage.getReceiverId()), MessageType.text, textMessage.getContent());
-        connectionMgr.sendTextMessage(textMessage.getSenderId(), textMessage.getReceiverId(), textMessage.getContent());
+        Message message = new Message();
+        message.setSender(textMessage.getSenderId());
+        message.setReceiver(textMessage.getReceiverId());
+        message.setType(MessageType.text);
+        message.setContent(textMessage.getContent());
+        messageMapper.insert(message);
+
+        message = messageMapper.queryByKey(message.getId());
+        connectionMgr.sendTextMessage(message);
     }
 
     private String identification(String s1, String s2) {

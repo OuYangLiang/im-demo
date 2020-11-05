@@ -1,5 +1,6 @@
 package com.personal.oyl.im.gateway.model;
 
+import com.personal.oyl.im.gateway.im.Message;
 import com.personal.oyl.im.gateway.im.MessageType;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +77,7 @@ public class ConnectionMgrImpl implements ConnectionMgr {
         return new ArrayList<>(channels.keySet());
     }
 
-    @Override
+    /*@Override
     public void sendTextMessage(String userFrom, String userTo, String message) {
         TextMessage param = new TextMessage();
 
@@ -92,6 +93,25 @@ public class ConnectionMgrImpl implements ConnectionMgr {
 
         //this.queryChannel(userTo).writeAndFlush(new TextWebSocketFrame(protocol.toJson()));
         this.sendWrapper.send(this.queryChannel(userTo), protocol);
+    }*/
+
+    @Override
+    public void sendTextMessage(Message message) {
+        TextMessage param = new TextMessage();
+
+        param.setSenderId(message.getSender());
+        param.setReceiverId(message.getReceiver());
+        param.setContent(message.getContent());
+        param.setCreatedTime(message.getCreatedTime());
+
+        Protocol protocol = new Protocol();
+        protocol.setType(ProtocolType.business);
+        protocol.setMsgId(UUID.randomUUID().toString());
+        protocol.setSubType(MessageType.text);
+        protocol.setContent(param.json());
+
+        //this.queryChannel(userTo).writeAndFlush(new TextWebSocketFrame(protocol.toJson()));
+        this.sendWrapper.send(this.queryChannel(message.getReceiver()), protocol);
     }
 
     @Autowired

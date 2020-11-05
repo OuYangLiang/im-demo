@@ -77,6 +77,22 @@
     </div>
 
     <script>
+        function getFormatDate() {
+            var date = new Date();
+            var y = date.getFullYear();
+            var m = date.getMonth() + 1;
+            m = m < 10 ? ('0' + m) : m;
+            var d = date.getDate();
+            d = d < 10 ? ('0' + d) : d;
+            var h = date.getHours();
+            h = h < 10 ? ('0' + h) : h;
+            var minute = date.getMinutes();
+            var second = date.getSeconds();
+            minute = minute < 10 ? ('0' + minute) : minute;
+            second = second < 10 ? ('0' + second) : second;
+            return y + '-' + m + '-' + d+' '+h+':'+minute+':'+second;
+        }
+
         function  uuid() {
             var  s = [];
             var  hexDigits =  "0123456789abcdef" ;
@@ -149,7 +165,7 @@
                     });
                 },
                 initChat: function(targetId) {
-                    this.$http.post("queryChat", {loginId1: vm.loginId, loginId2: targetId, n: 20}, {emulateJSON: false}).then(function(res) {
+                    this.$http.post("queryChat", {loginId1: vm.loginId, loginId2: targetId, n: 200}, {emulateJSON: false}).then(function(res) {
                         if (!res.body.success) {
                             return;
                         }
@@ -162,7 +178,7 @@
                                 if (datacontent.senderId == vm.loginId) {
                                     var param = {};
                                     param.direction = "sent";
-                                    param.senderId = this.loginId;
+                                    param.senderId = vm.loginId;
                                     param.receivered = targetId;
                                     param.timestamp = datacontent.createdTime;
                                     param.type = "text";
@@ -252,7 +268,7 @@
                     param.direction = "sent";
                     param.senderId = this.loginId;
                     param.receivered = this.currentActive.loginId;
-                    param.timestamp = "xxx";
+                    param.timestamp = getFormatDate();
                     param.type = "text";
                     param.content = this.contentInput;
 
@@ -339,7 +355,7 @@
                             param.direction = "received";
                             param.senderId = datacontent.senderId;
                             param.receiverId = vm.loginId;
-                            param.timestamp = "xxx";
+                            param.timestamp = datacontent.createdTime;
                             param.type = "text";
                             param.content = datacontent.content;
 

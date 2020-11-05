@@ -80,4 +80,8 @@ public class Message implements Serializable {
     public void setReadTime(Date readTime) {
         this.readTime = readTime;
     }
+
+    public String getIdentification() {
+        return (getSender().compareTo(getReceiver()) > 0) ? getSender() + "|" + getReceiver() : getReceiver() + "|" + getSender();
+    }
 }

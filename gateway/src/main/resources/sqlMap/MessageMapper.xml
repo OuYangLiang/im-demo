@@ -12,18 +12,25 @@
         <result column="read_time" property="readTime" jdbcType="TIMESTAMP" />
 	</resultMap>
 
-    <insert id="insert">
+    <insert id="insert" parameterType="com.personal.oyl.im.gateway.im.Message" useGeneratedKeys="true" keyProperty="id">
         insert into `message`(
             `sender`, `receiver`, `Identification`, `type`, `status`, `content`
         ) values (
-            #{param1,jdbcType=VARCHAR},
-            #{param2,jdbcType=VARCHAR},
-            #{param3,jdbcType=VARCHAR},
-            #{param4,typeHandler=com.personal.oyl.im.gateway.im.MessageTypeHandler},
+            #{sender,jdbcType=VARCHAR},
+            #{receiver,jdbcType=VARCHAR},
+            #{identification,jdbcType=VARCHAR},
+            #{type,typeHandler=com.personal.oyl.im.gateway.im.MessageTypeHandler},
             0,
-            #{param5,jdbcType=VARCHAR}
+            #{content,jdbcType=VARCHAR}
         )
     </insert>
+
+    <select id="queryByKey" resultMap="BaseResultMap">
+        select `id`, `sender`, `receiver`, `type`, `status`, `content`, `created_time`, `read_time`
+        from `message`
+        where `id` = #{param1,jdbcType=BIGINT}
+        limit 1
+    </select>
 
     <select id="queryLastN" resultMap="BaseResultMap">
         select a.`id`, a.`sender`, a.`receiver`, a.`type`, a.`status`, a.`content`, a.`created_time`, a.`read_time`
@@ -34,7 +41,6 @@
             limit ${param2}) b
         where a.`id` = b.`id`
         order by a.`id` asc
-
     </select>
 
 </mapper>
