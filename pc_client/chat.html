@@ -164,7 +164,7 @@
                                     param.direction = "sent";
                                     param.senderId = this.loginId;
                                     param.receivered = targetId;
-                                    param.timestamp = "xxx";
+                                    param.timestamp = datacontent.createdTime;
                                     param.type = "text";
                                     param.content = datacontent.content;
 
@@ -174,7 +174,7 @@
                                     param.direction = "received";
                                     param.senderId = targetId;
                                     param.receiverId = vm.loginId;
-                                    param.timestamp = "xxx";
+                                    param.timestamp = datacontent.createdTime;
                                     param.type = "text";
                                     param.content = datacontent.content;
 

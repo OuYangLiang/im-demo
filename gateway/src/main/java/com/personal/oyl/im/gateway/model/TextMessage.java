@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.personal.oyl.im.gateway.im.Message;
 
+import java.util.Date;
+
 /**
  * @author OuYang Liang
  * @since 2020-10-27
@@ -14,6 +16,7 @@ public class TextMessage {
     private String senderId;
     private String receiverId;
     private String content;
+    private Date createdTime;
 
     public String getSenderId() {
         return senderId;
@@ -39,6 +42,14 @@ public class TextMessage {
         this.content = content;
     }
 
+    public Date getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(Date createdTime) {
+        this.createdTime = createdTime;
+    }
+
     public String json() {
         return gson.toJson(this);
     }
@@ -52,7 +63,7 @@ public class TextMessage {
         rlt.setSenderId(message.getSender());
         rlt.setReceiverId(message.getReceiver());
         rlt.setContent(message.getContent());
-
+        rlt.setCreatedTime(message.getCreatedTime());
         return rlt;
     }
 }
