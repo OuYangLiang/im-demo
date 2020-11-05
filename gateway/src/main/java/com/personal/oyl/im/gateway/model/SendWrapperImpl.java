@@ -1,9 +1,6 @@
 package com.personal.oyl.im.gateway.model;
 
-import com.personal.oyl.im.gateway.command.Command;
-import com.personal.oyl.im.gateway.command.SendCommand;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.DelayQueue;

@@ -1,5 +1,7 @@
 package com.personal.oyl.im.gateway;
 
+import com.personal.oyl.im.gateway.im.ImService;
+import com.personal.oyl.im.gateway.im.MessageType;
 import com.personal.oyl.im.gateway.model.*;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;

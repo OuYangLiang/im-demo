@@ -1,13 +1,12 @@
-package com.personal.oyl.im.gateway.model;
+package com.personal.oyl.im.gateway.im;
 
-public enum MessageStatus {
-    initial(0),
-    delivery(1),
-    read(2);
+public enum MessageType {
+    text(0),
+    ;
 
     private int code;
 
-    MessageStatus(int code) {
+    MessageType(int code) {
         this.code = code;
     }
 
@@ -15,8 +14,8 @@ public enum MessageStatus {
         return code;
     }
 
-    public static MessageStatus init(int code) {
-        for (MessageStatus item : MessageStatus.values()) {
+    public static MessageType init(int code) {
+        for (MessageType item : MessageType.values()) {
             if (item.getCode() == code) {
                 return item;
             }

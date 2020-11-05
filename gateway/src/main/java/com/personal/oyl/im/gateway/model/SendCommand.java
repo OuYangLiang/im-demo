@@ -1,9 +1,8 @@
-package com.personal.oyl.im.gateway.command;
+package com.personal.oyl.im.gateway.model;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
-import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 

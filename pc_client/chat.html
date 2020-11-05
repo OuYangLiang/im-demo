@@ -13,8 +13,8 @@
 
     <div class="total_box" id="app">
         <div class="contact_box">
-            <div class="contact" v-bind:class="{ contact_active: contact.active }" v-for="contact of contacts" v-on:click="switchContact(contact.userId)">
-                {{contact.userId}}
+            <div class="contact" v-bind:class="{ contact_active: contact.active }" v-for="contact of contacts" v-on:click="switchContact(contact.loginId)">
+                {{contact.userName}}
             </div>
             <!-- <div class="contact">
                 Lisa
@@ -94,7 +94,7 @@
         var vm = new Vue({
             el: '#app',
             data: {
-                userId: '',
+                loginId: '',
                 sec: '',
 
                 contentInput: null,
@@ -121,10 +121,10 @@
                     }
 
                     var param = decodeURIComponent(location.href.substr(idx + 1));
-                    this.userId = param.split("|")[0];
+                    this.loginId = param.split("|")[0];
                     this.sec = param.split("|")[1];
 
-                    this.$http.post("check", { userId: this.userId, sec: this.sec}, {emulateJSON: false}).then(function(res) {
+                    this.$http.post("check", { loginId: this.loginId, sec: this.sec}, {emulateJSON: false}).then(function(res) {
                         if (!res.body.success) {
                             alert(res.body.errMsg);
                             return;
@@ -135,32 +135,32 @@
                         console.log(res);
                     });
                 },
-                switchContact: function(userId) {
+                switchContact: function(loginId) {
                     vm.contacts.forEach(function(contact) {
                         if (contact.active) {
                             contact.active = false;
                         }
 
-                        if (contact.userId == userId) {
+                        if (contact.loginId == loginId) {
                             contact.active = true;
                             vm.currentActive = contact;
-                            vm.currentMessages = vm.messages[userId];
+                            vm.currentMessages = vm.messages[loginId];
                         }
                     });
                 },
                 initContactList: function() {
-                    this.$http.post("onlineUsers", {userId: this.userId}, {emulateJSON: false}).then(function(res) {
+                    this.$http.post("queryFriends", {loginId: this.loginId}, {emulateJSON: false}).then(function(res) {
                         if (!res.body.success) {
                             return;
                         }
 
                         res.body.data.forEach(function(item, idx) {
-                            if (item != vm.userId) {
                               var obj = {};
-                              obj.userId = item;
+                              obj.loginId = item.loginId;
+                              obj.userName = item.userName;
+                              obj.icon = item.icon;
                               obj.active = false;
                               vm.contacts.push(obj);
-                            }
                         });
                     }, function(res) {
                         console.log(res);
@@ -197,8 +197,8 @@
                     param.subType = "text";
                     param.msgId = uuid();
                     param.content = {};
-                    param.content.senderId = this.userId;
-                    param.content.receiverId = this.currentActive.userId;
+                    param.content.senderId = this.loginId;
+                    param.content.receiverId = this.currentActive.loginId;
                     param.content.content = this.contentInput;
                     param.content = JSON.stringify(param.content);
 
@@ -207,14 +207,14 @@
 
                     param = {};
                     param.direction = "sent";
-                    param.senderId = this.userId;
-                    param.receivered = this.currentActive.userId;
+                    param.senderId = this.loginId;
+                    param.receivered = this.currentActive.loginId;
                     param.timestamp = "xxx";
                     param.type = "text";
                     param.content = this.contentInput;
 
                     //this.currentMessages.push(param);
-                    this.messages[vm.currentActive.userId].push(param);
+                    this.messages[vm.currentActive.loginId].push(param);
                     this.contentInput = '';
                 },
                 connect: function() {
@@ -229,7 +229,7 @@
                         var param = {};
                         param.type = "connect";
                         param.msgId = uuid();
-                        param.content = vm.userId;
+                        param.content = vm.loginId;
 
                         vm.socket.send(JSON.stringify(param));
                         //alert("websocket已打开");
@@ -261,41 +261,41 @@
                             return;
                         }
 
-                        if (data.type=="online") {
-                            var obj = {};
-                            obj.userId = data.content;
-                            obj.active = false;
-                            vm.contacts.push(obj);
+                        // if (data.type=="online") {
+                        //     var obj = {};
+                        //     obj.userId = data.content;
+                        //     obj.active = false;
+                        //     vm.contacts.push(obj);
+                        //
+                        //     var param = {};
+                        //     param.type = "online_ack";
+                        //     param.msgId = data.msgId;
+                        //     vm.socket.send(JSON.stringify(param));
+                        //
+                        //     return;
+                        // }
 
-                            var param = {};
-                            param.type = "online_ack";
-                            param.msgId = data.msgId;
-                            vm.socket.send(JSON.stringify(param));
-
-                            return;
-                        }
-
-                        if (data.type=="offline") {
-                            for(i = 0, len = vm.contacts.length; i < len; i++) {
-                                if (vm.contacts[i].userId == data.content) {
-                                    vm.contacts.splice(i,1);
-                                }
-                            }
-
-                            var param = {};
-                            param.type = "offline_ack";
-                            param.msgId = data.msgId;
-                            vm.socket.send(JSON.stringify(param));
-
-                            return;
-                        }
+                        // if (data.type=="offline") {
+                        //     for(i = 0, len = vm.contacts.length; i < len; i++) {
+                        //         if (vm.contacts[i].userId == data.content) {
+                        //             vm.contacts.splice(i,1);
+                        //         }
+                        //     }
+                        //
+                        //     var param = {};
+                        //     param.type = "offline_ack";
+                        //     param.msgId = data.msgId;
+                        //     vm.socket.send(JSON.stringify(param));
+                        //
+                        //     return;
+                        // }
 
                         if (data.type=="business" && data.subType =="text") {
                             var datacontent = JSON.parse(data.content);
                             var param = {};
                             param.direction = "received";
                             param.senderId = datacontent.senderId;
-                            param.receiverId = vm.userId;
+                            param.receiverId = vm.loginId;
                             param.timestamp = "xxx";
                             param.type = "text";
                             param.content = datacontent.content;
@@ -325,16 +325,16 @@
             watch: {
                 contacts: function (newContacts, oldContacts) {
                     newContacts.forEach(function(contact) {
-                        if (!vm.messages.hasOwnProperty(contact.userId)) {
+                        if (!vm.messages.hasOwnProperty(contact.loginId)) {
                             console.log(vm.messages);
-                            vm.messages[contact.userId] = [];
+                            vm.messages[contact.loginId] = [];
                         }
                     });
 
                     if (null == vm.currentActive && vm.contacts.length > 0) {
                         vm.contacts[0].active = true;
                         vm.currentActive = vm.contacts[0];
-                        vm.currentMessages = vm.messages[vm.currentActive.userId];
+                        vm.currentMessages = vm.messages[vm.currentActive.loginId];
                     }
                 }
             },

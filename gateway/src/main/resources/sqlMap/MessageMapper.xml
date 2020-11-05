@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.personal.oyl.im.gateway.model.MessageMapper">
-	<resultMap id="BaseResultMap" type="com.personal.oyl.im.gateway.model.Message">
+<mapper namespace="com.personal.oyl.im.gateway.im.MessageMapper">
+	<resultMap id="BaseResultMap" type="com.personal.oyl.im.gateway.im.Message">
         <result column="id" property="id" jdbcType="BIGINT" />
         <result column="sender" property="sender" jdbcType="VARCHAR" />
         <result column="receiver" property="receiver" jdbcType="VARCHAR" />
-        <result column="type" property="type" typeHandler="com.personal.oyl.im.gateway.model.MessageTypeHandler" />
-        <result column="status" property="status" typeHandler="com.personal.oyl.im.gateway.model.MessageStatusHandler" />
+        <result column="type" property="type" typeHandler="com.personal.oyl.im.gateway.im.MessageTypeHandler" />
+        <result column="status" property="status" typeHandler="com.personal.oyl.im.gateway.im.MessageStatusHandler" />
         <result column="content" property="content" jdbcType="VARCHAR" />
         <result column="created_time" property="createdTime" jdbcType="TIMESTAMP" />
         <result column="read_time" property="readTime" jdbcType="TIMESTAMP" />
@@ -23,7 +23,7 @@
         ) values (
             #{param1,jdbcType=VARCHAR},
             #{param2,jdbcType=VARCHAR},
-            #{param3,typeHandler=com.personal.oyl.im.gateway.model.MessageTypeHandler},
+            #{param3,typeHandler=com.personal.oyl.im.gateway.im.MessageTypeHandler},
             0,
             #{param4,jdbcType=VARCHAR}
         )

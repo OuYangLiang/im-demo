@@ -4,11 +4,10 @@ import java.io.Serializable;
 
 /**
  * @author OuYang Liang
- * @since 2020-10-28
+ * @since 2020-11-05
  */
-public class CheckParam implements Serializable {
+public class FriendsQueryParam implements Serializable {
     private String loginId;
-    private String sec;
 
     public String getLoginId() {
         return loginId;
@@ -16,13 +15,5 @@ public class CheckParam implements Serializable {
 
     public void setLoginId(String loginId) {
         this.loginId = loginId;
-    }
-
-    public String getSec() {
-        return sec;
-    }
-
-    public void setSec(String sec) {
-        this.sec = sec;
     }
 }

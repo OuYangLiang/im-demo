@@ -2,6 +2,7 @@ package com.personal.oyl.im.gateway.model;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.personal.oyl.im.gateway.im.MessageType;
 
 /**
  * @author OuYang Liang

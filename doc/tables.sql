@@ -9,3 +9,24 @@ create table if not exists `message` (
   `read_time`       datetime      not null default current_timestamp comment '已读时间',
   primary key (`id`)
 ) engine=innodb default charset=utf8mb4 comment='消息表';
+
+
+create table if not exists `user` (
+  `id`              bigint        not null  auto_increment comment '主键',
+  `login_id`        varchar(50)   not null comment '账号',
+  `user_name`       varchar(50)   not null comment '客户姓名',
+  `password`        varchar(128)  not null comment '密码',
+  `icon`            varchar(50)   not null comment '头像地址',
+  primary key (`id`),
+  unique key (`login_id`)
+) engine=innodb default charset=utf8mb4 comment='用户表';
+
+insert into `user`(`login_id`, `user_name`, `password`, `icon`) values
+('oyl', '欧阳亮', '3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2', 'user1-128x128.jpg'),
+('yumin', '喻敏', '3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2', 'user1-128x128.jpg'),
+('xx', '晓筱', '3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2', 'user1-128x128.jpg');
+
+
+
+insert into `user`(`login_id`, `user_name`, `password`, `icon`) values
+('xx', '晓筱', '3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2', 'user1-128x128.jpg');

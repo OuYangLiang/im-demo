@@ -1,4 +1,4 @@
-package com.personal.oyl.im.gateway.model;
+package com.personal.oyl.im.gateway.im;
 
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;

@@ -1,16 +1,20 @@
 package com.personal.oyl.im.gateway.controller;
 
 import com.personal.oyl.im.gateway.model.ConnectionMgr;
+import com.personal.oyl.im.gateway.user.User;
+import com.personal.oyl.im.gateway.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * @author OuYang Liang
@@ -22,6 +26,7 @@ public class DefaultController {
     private static Map<String, String> check = new ConcurrentHashMap<>();
 
     private ConnectionMgr connectionMgr;
+    private UserService userService;
 
     @RequestMapping("/hello")
     public String hello() {
@@ -47,11 +52,11 @@ public class DefaultController {
 
     @RequestMapping(value = "/check", method = {RequestMethod.POST})
     public WebResult<?> check(@RequestBody CheckParam param) {
-        if (!check.containsKey(param.getUserId().toUpperCase())) {
+        if (!check.containsKey(param.getLoginId().toUpperCase())) {
             return WebResult.fail("Error003", "非法访问");
         }
 
-        if (!check.get(param.getUserId().toUpperCase()).equalsIgnoreCase(param.getSec())) {
+        if (!check.get(param.getLoginId().toUpperCase()).equalsIgnoreCase(param.getSec())) {
             return WebResult.fail("Error003", "非法访问");
         }
 
@@ -63,8 +68,23 @@ public class DefaultController {
         return WebResult.success(connectionMgr.onlineUsers());
     }
 
+    @RequestMapping("/queryFriends")
+    public WebResult<List<UserDto>> queryFriends(@RequestBody FriendsQueryParam param) {
+        List<User> users = userService.queryFriends(param.getLoginId());
+        if (null == users || users.isEmpty()) {
+            return WebResult.success(Collections.emptyList());
+        }
+
+        return WebResult.success(users.stream().map(UserDto::from).collect(Collectors.toList()));
+    }
+
     @Autowired
     public void setConnectionMgr(ConnectionMgr connectionMgr) {
         this.connectionMgr = connectionMgr;
+    }
+
+    @Autowired
+    public void setUserService(UserService userService) {
+        this.userService = userService;
     }
 }

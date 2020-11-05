@@ -1,7 +1,7 @@
 package com.personal.oyl.im.gateway.model;
 
+import com.personal.oyl.im.gateway.im.MessageType;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +39,7 @@ public class ConnectionMgrImpl implements ConnectionMgr {
         channels.put(userId, channel);
 
         // 异步
-        for (String otherId : this.onlineUsers()) {
+        /*for (String otherId : this.onlineUsers()) {
             if (!otherId.equalsIgnoreCase(userId)) {
                 Protocol pro = new Protocol();
                 pro.setType(ProtocolType.online);
@@ -49,7 +49,7 @@ public class ConnectionMgrImpl implements ConnectionMgr {
                 //this.queryChannel(otherId).writeAndFlush(new TextWebSocketFrame(pro.toJson()));
                 this.sendWrapper.send(this.queryChannel(otherId), pro);
             }
-        }
+        }*/
     }
 
     @Override
@@ -58,7 +58,7 @@ public class ConnectionMgrImpl implements ConnectionMgr {
         liveConns.remove(channel.id().asLongText());
         channels.remove(currentId);
 
-        for (String userId : this.onlineUsers()) {
+        /*for (String userId : this.onlineUsers()) {
             if (!userId.equalsIgnoreCase(currentId)) {
                 Protocol pro = new Protocol();
                 pro.setType(ProtocolType.offline);
@@ -68,7 +68,7 @@ public class ConnectionMgrImpl implements ConnectionMgr {
                 //this.queryChannel(userId).writeAndFlush(new TextWebSocketFrame(pro.toJson()));
                 this.sendWrapper.send(this.queryChannel(userId), pro);
             }
-        }
+        }*/
     }
 
     @Override

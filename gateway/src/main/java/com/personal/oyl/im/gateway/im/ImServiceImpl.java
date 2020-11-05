@@ -1,5 +1,7 @@
-package com.personal.oyl.im.gateway.model;
+package com.personal.oyl.im.gateway.im;
 
+import com.personal.oyl.im.gateway.model.ConnectionMgr;
+import com.personal.oyl.im.gateway.model.TextMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class ImServiceImpl implements ImService {
 
     private ConnectionMgr connectionMgr;
-    private MessageMapper  messageMapper;
+    private MessageMapper messageMapper;
 
     @Override
     public void onTextMessage(TextMessage textMessage) {

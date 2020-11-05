@@ -1,4 +1,4 @@
-package com.personal.oyl.im.gateway.command;
+package com.personal.oyl.im.gateway.model;
 
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
