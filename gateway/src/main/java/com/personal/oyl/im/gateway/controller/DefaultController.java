@@ -1,9 +1,7 @@
 package com.personal.oyl.im.gateway.controller;
 
 import com.personal.oyl.im.gateway.im.ImService;
-import com.personal.oyl.im.gateway.model.ConnectionMgr;
 import com.personal.oyl.im.gateway.model.Protocol;
-import com.personal.oyl.im.gateway.model.TextMessage;
 import com.personal.oyl.im.gateway.user.User;
 import com.personal.oyl.im.gateway.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +26,6 @@ public class DefaultController {
 
     private static Map<String, String> check = new ConcurrentHashMap<>();
 
-    private ConnectionMgr connectionMgr;
     private UserService userService;
     private ImService imService;
 
@@ -67,10 +64,10 @@ public class DefaultController {
         return WebResult.success();
     }
 
-    @RequestMapping("/onlineUsers")
+    /*@RequestMapping("/onlineUsers")
     public WebResult<List<String>> onlineUsers() {
         return WebResult.success(connectionMgr.onlineUsers());
-    }
+    }*/
 
     @RequestMapping("/queryFriends")
     public WebResult<List<UserDto>> queryFriends(@RequestBody FriendsQueryParam param) {
@@ -88,11 +85,6 @@ public class DefaultController {
     }
 
     @Autowired
-    public void setConnectionMgr(ConnectionMgr connectionMgr) {
-        this.connectionMgr = connectionMgr;
-    }
-
-    @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;
     }
@@ -101,4 +93,5 @@ public class DefaultController {
     public void setImService(ImService imService) {
         this.imService = imService;
     }
+
 }

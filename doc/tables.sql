@@ -8,6 +8,7 @@ create table if not exists `message` (
   `content`         varchar(255)  not null comment '消息内容',
   `created_time`    datetime      not null default current_timestamp comment '创建时间',
   `read_time`       datetime      not null default current_timestamp comment '已读时间',
+  `msg_id`          char(36)      not null comment '客户端消息唯一ID',
   primary key (`id`)
 ) engine=innodb default charset=utf8mb4 comment='消息表';
 
@@ -25,9 +26,4 @@ create table if not exists `user` (
 insert into `user`(`login_id`, `user_name`, `password`, `icon`) values
 ('oyl', '欧阳亮', '3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2', 'user1-128x128.jpg'),
 ('yumin', '喻敏', '3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2', 'user1-128x128.jpg'),
-('xx', '晓筱', '3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2', 'user1-128x128.jpg');
-
-
-
-insert into `user`(`login_id`, `user_name`, `password`, `icon`) values
 ('xx', '晓筱', '3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2', 'user1-128x128.jpg');

@@ -10,7 +10,9 @@ import java.util.List;
  * @since 2020-11-01
  */
 public interface ImService {
-    void onTextMessage(TextMessage textMessage);
+    void onTextMessage(String msgId, TextMessage textMessage);
+
+    void onAck(String msgId);
 
     List<Protocol> queryLastN(String loginId1, String loginId2, int n);
 }

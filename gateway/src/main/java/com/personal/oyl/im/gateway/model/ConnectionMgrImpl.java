@@ -6,8 +6,6 @@ import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -72,9 +70,14 @@ public class ConnectionMgrImpl implements ConnectionMgr {
         }*/
     }
 
-    @Override
+    /*@Override
     public List<String> onlineUsers() {
         return new ArrayList<>(channels.keySet());
+    }*/
+
+    @Override
+    public boolean isUserOnline(String loginId) {
+        return channels.containsKey(loginId);
     }
 
     /*@Override
@@ -106,7 +109,7 @@ public class ConnectionMgrImpl implements ConnectionMgr {
 
         Protocol protocol = new Protocol();
         protocol.setType(ProtocolType.business);
-        protocol.setMsgId(UUID.randomUUID().toString());
+        protocol.setMsgId(message.getMsgId());
         protocol.setSubType(MessageType.text);
         protocol.setContent(param.json());
 

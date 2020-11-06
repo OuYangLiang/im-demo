@@ -10,30 +10,32 @@
         <result column="content" property="content" jdbcType="VARCHAR" />
         <result column="created_time" property="createdTime" jdbcType="TIMESTAMP" />
         <result column="read_time" property="readTime" jdbcType="TIMESTAMP" />
+        <result column="msg_id" property="msgId" jdbcType="VARCHAR" />
 	</resultMap>
 
     <insert id="insert" parameterType="com.personal.oyl.im.gateway.im.Message" useGeneratedKeys="true" keyProperty="id">
         insert into `message`(
-            `sender`, `receiver`, `Identification`, `type`, `status`, `content`
+            `sender`, `receiver`, `Identification`, `type`, `status`, `content`, `msg_id`
         ) values (
             #{sender,jdbcType=VARCHAR},
             #{receiver,jdbcType=VARCHAR},
             #{identification,jdbcType=VARCHAR},
             #{type,typeHandler=com.personal.oyl.im.gateway.im.MessageTypeHandler},
             0,
-            #{content,jdbcType=VARCHAR}
+            #{content,jdbcType=VARCHAR},
+            #{msgId,jdbcType=VARCHAR}
         )
     </insert>
 
     <select id="queryByKey" resultMap="BaseResultMap">
-        select `id`, `sender`, `receiver`, `type`, `status`, `content`, `created_time`, `read_time`
+        select `id`, `sender`, `receiver`, `type`, `status`, `content`, `created_time`, `read_time`, `msg_id`
         from `message`
         where `id` = #{param1,jdbcType=BIGINT}
         limit 1
     </select>
 
     <select id="queryLastN" resultMap="BaseResultMap">
-        select a.`id`, a.`sender`, a.`receiver`, a.`type`, a.`status`, a.`content`, a.`created_time`, a.`read_time`
+        select a.`id`, a.`sender`, a.`receiver`, a.`type`, a.`status`, a.`content`, a.`created_time`, a.`read_time`, a.`msg_id`
         from `message` a,
         (select `id` from `message`
             where `identification` = #{param1,jdbcType=VARCHAR}
@@ -42,5 +44,11 @@
         where a.`id` = b.`id`
         order by a.`id` asc
     </select>
+
+    <update id="onAck">
+        update `message` set
+        `status` = 1
+        where `msg_id` = #{param1}
+    </update>
 
 </mapper>

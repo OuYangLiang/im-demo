@@ -3,8 +3,6 @@ package com.personal.oyl.im.gateway.model;
 import com.personal.oyl.im.gateway.im.Message;
 import io.netty.channel.Channel;
 
-import java.util.List;
-
 public interface ConnectionMgr {
     String queryUserId(String channelId);
 
@@ -14,7 +12,9 @@ public interface ConnectionMgr {
 
     void channelDisconnected(Channel channel);
 
-    List<String> onlineUsers();
+    //List<String> onlineUsers();
+
+    boolean isUserOnline(String loginId);
 
     //void sendTextMessage(String userFrom, String userTo, String message);
 

@@ -22,16 +22,22 @@ public class ImServiceImpl implements ImService {
     private MessageMapper messageMapper;
 
     @Override
-    public void onTextMessage(TextMessage textMessage) {
+    public void onTextMessage(String msgId, TextMessage textMessage) {
         Message message = new Message();
         message.setSender(textMessage.getSenderId());
         message.setReceiver(textMessage.getReceiverId());
         message.setType(MessageType.text);
         message.setContent(textMessage.getContent());
+        message.setMsgId(msgId);
         messageMapper.insert(message);
 
         message = messageMapper.queryByKey(message.getId());
         connectionMgr.sendTextMessage(message);
+    }
+
+    @Override
+    public void onAck(String msgId) {
+        int i = messageMapper.onAck(msgId);
     }
 
     private String identification(String s1, String s2) {

@@ -44,12 +44,13 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
             sendWrapper.clear(protocol.getMsgId());
         } else if (ProtocolType.business_ack.equals(protocol.getType())) {
             sendWrapper.clear(protocol.getMsgId());
+            imService.onAck(protocol.getMsgId());
         } else if (ProtocolType.business.equals(protocol.getType())) {
             ctx.writeAndFlush(new TextWebSocketFrame(protocol.toAck().toJson()));
 
             if (MessageType.text.equals(protocol.getSubType())) {
                 TextMessage message = TextMessage.fromJson(protocol.getContent());
-                imService.onTextMessage(message);
+                imService.onTextMessage(protocol.getMsgId(), message);
             }
         }
     }

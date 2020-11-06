@@ -10,4 +10,6 @@ public interface MessageMapper {
     Message queryByKey(long id);
 
     List<Message> queryLastN(String identification, int n);
+
+    int onAck(String msgId);
 }

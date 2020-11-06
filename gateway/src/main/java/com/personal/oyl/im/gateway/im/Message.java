@@ -16,6 +16,7 @@ public class Message implements Serializable {
     private String content;
     private Date createdTime;
     private Date readTime;
+    private String msgId;
 
     public Long getId() {
         return id;
@@ -79,6 +80,14 @@ public class Message implements Serializable {
 
     public void setReadTime(Date readTime) {
         this.readTime = readTime;
+    }
+
+    public String getMsgId() {
+        return msgId;
+    }
+
+    public void setMsgId(String msgId) {
+        this.msgId = msgId;
     }
 
     public String getIdentification() {
