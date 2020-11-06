@@ -15,4 +15,6 @@ public interface ImService {
     void onAck(String msgId);
 
     List<Protocol> queryLastN(String loginId1, String loginId2, int n);
+
+    //void onConnected(String loginId);
 }

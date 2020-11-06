@@ -34,6 +34,14 @@
         limit 1
     </select>
 
+    <select id="queryUndelivered" resultMap="BaseResultMap">
+        select `id`, `sender`, `receiver`, `type`, `status`, `content`, `created_time`, `read_time`, `msg_id`
+        from `message`
+        where `status` = 0
+        and `receiver` = #{param1,jdbcType=VARCHAR}
+        order by id asc
+    </select>
+
     <select id="queryLastN" resultMap="BaseResultMap">
         select a.`id`, a.`sender`, a.`receiver`, a.`type`, a.`status`, a.`content`, a.`created_time`, a.`read_time`, a.`msg_id`
         from `message` a,

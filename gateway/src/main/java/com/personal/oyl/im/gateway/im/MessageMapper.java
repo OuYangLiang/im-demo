@@ -12,4 +12,6 @@ public interface MessageMapper {
     List<Message> queryLastN(String identification, int n);
 
     int onAck(String msgId);
+
+    List<Message> queryUndelivered(String loginId);
 }

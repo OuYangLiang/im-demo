@@ -31,8 +31,10 @@ public class ImServiceImpl implements ImService {
         message.setMsgId(msgId);
         messageMapper.insert(message);
 
-        message = messageMapper.queryByKey(message.getId());
-        connectionMgr.sendTextMessage(message);
+        if (connectionMgr.isUserOnline(textMessage.getReceiverId())) {
+            message = messageMapper.queryByKey(message.getId());
+            connectionMgr.sendTextMessage(message);
+        }
     }
 
     @Override
@@ -52,15 +54,31 @@ public class ImServiceImpl implements ImService {
             return Collections.emptyList();
         }
 
+        for (Message message : messages) {
+            if (MessageStatus.initial.equals(message.getStatus()) && message.getReceiver().equalsIgnoreCase(senderId)) {
+                messageMapper.onAck(message.getMsgId());
+            }
+        }
+
         return messages.stream().map((m) -> {
             Protocol pro = new Protocol();
             pro.setType(ProtocolType.business);
             pro.setSubType(m.getType());
-            pro.setMsgId(null); // TODO
+            pro.setMsgId(m.getMsgId());
             pro.setContent(TextMessage.from(m).json());
             return pro;
         }).collect(Collectors.toList());
     }
+
+    /*@Override
+    public void onConnected(String loginId) {
+        List<Message> undelivered = messageMapper.queryUndelivered(loginId);
+        if (null != undelivered && !undelivered.isEmpty()) {
+            for (Message msg : undelivered) {
+                connectionMgr.sendTextMessage(msg);
+            }
+        }
+    }*/
 
     @Autowired
     public void setConnectionMgr(ConnectionMgr connectionMgr) {

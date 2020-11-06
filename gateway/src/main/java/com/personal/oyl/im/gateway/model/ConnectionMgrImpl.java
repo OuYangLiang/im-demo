@@ -1,11 +1,13 @@
 package com.personal.oyl.im.gateway.model;
 
+import com.personal.oyl.im.gateway.im.ImService;
 import com.personal.oyl.im.gateway.im.Message;
 import com.personal.oyl.im.gateway.im.MessageType;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,6 +23,7 @@ public class ConnectionMgrImpl implements ConnectionMgr {
     private static final Map<String, Channel> channels = new ConcurrentHashMap<>();
 
     private SendWrapper sendWrapper;
+//    private ImService imService;
 
     @Override
     public String queryUserId(String channelId) {
@@ -36,6 +39,7 @@ public class ConnectionMgrImpl implements ConnectionMgr {
     public void markConnected(String userId, Channel channel) {
         liveConns.put(channel.id().asLongText(), userId);
         channels.put(userId, channel);
+//        imService.onConnected(userId);
 
         // 异步
         /*for (String otherId : this.onlineUsers()) {
@@ -121,4 +125,9 @@ public class ConnectionMgrImpl implements ConnectionMgr {
     public void setSendWrapper(SendWrapper sendWrapper) {
         this.sendWrapper = sendWrapper;
     }
+
+    /*@Autowired
+    public void setImService(ImService imService) {
+        this.imService = imService;
+    }*/
 }
