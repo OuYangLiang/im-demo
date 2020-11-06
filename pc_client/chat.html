@@ -28,7 +28,7 @@
             <div v-for="message of currentMessages" >
                 <div class="message_box_received_header" v-if="message.direction == 'received'">
                     <div class="user">
-                        {{message.senderId}}
+                        {{currentActive.userName}}
                     </div>
 
                     <div class="timestamp">
@@ -37,7 +37,7 @@
                 </div>
                 <div class="message_box_send_header" v-else>
                     <div class="user">
-                        {{message.senderId}}
+                        {{me.userName}}
                     </div>
 
                     <div class="timestamp">
@@ -49,7 +49,7 @@
 
                 <div class="message_box_received_body" v-if="message.direction == 'received'">
                     <div class="avatar">
-                        <img class="icon" src="user1-128x128.jpg" alt="message user image">
+                        <img class="icon" v-bind:src="'pic/' + currentActive.icon" alt="message user image">
                     </div>
 
                     <div class="content">
@@ -58,7 +58,7 @@
                 </div>
                 <div class="message_box_send_body" v-else>
                     <div class="avatar">
-                        <img class="icon" src="user3-128x128.jpg" alt="message user image">
+                        <img class="icon" v-bind:src="'pic/' + me.icon" alt="message user image">
                     </div>
 
                     <div class="content">
@@ -78,19 +78,19 @@
 
     <script>
         function getFormatDate() {
-            var date = new Date();
-            var y = date.getFullYear();
-            var m = date.getMonth() + 1;
-            m = m < 10 ? ('0' + m) : m;
-            var d = date.getDate();
-            d = d < 10 ? ('0' + d) : d;
-            var h = date.getHours();
-            h = h < 10 ? ('0' + h) : h;
-            var minute = date.getMinutes();
-            var second = date.getSeconds();
-            minute = minute < 10 ? ('0' + minute) : minute;
-            second = second < 10 ? ('0' + second) : second;
-            return y + '-' + m + '-' + d+' '+h+':'+minute+':'+second;
+          var date = new Date();
+          var y = date.getFullYear();
+          var m = date.getMonth() + 1;
+          m = m < 10 ? ('0' + m) : m;
+          var d = date.getDate();
+          d = d < 10 ? ('0' + d) : d;
+          var h = date.getHours();
+          h = h < 10 ? ('0' + h) : h;
+          var minute = date.getMinutes();
+          var second = date.getSeconds();
+          minute = minute < 10 ? ('0' + minute) : minute;
+          second = second < 10 ? ('0' + second) : second;
+          return y + '-' + m + '-' + d+' '+h+':'+minute+':'+second;
         }
 
         function  uuid() {
@@ -110,9 +110,7 @@
         var vm = new Vue({
             el: '#app',
             data: {
-                loginId: '',
-                sec: '',
-
+                me: {},
                 contentInput: null,
                 contacts: [],
                 currentActive: null, // cache
@@ -137,14 +135,19 @@
                     }
 
                     var param = decodeURIComponent(location.href.substr(idx + 1));
-                    this.loginId = param.split("|")[0];
-                    this.sec = param.split("|")[1];
+                    var loginId = param.split("|")[0];
+                    var sec = param.split("|")[1];
 
-                    this.$http.post("check", { loginId: this.loginId, sec: this.sec}, {emulateJSON: false}).then(function(res) {
+                    this.$http.post("check", { loginId: loginId, sec: sec}, {emulateJSON: false}).then(function(res) {
                         if (!res.body.success) {
                             alert(res.body.errMsg);
                             return;
                         }
+
+                        vm.me.loginId = res.body.data.loginId;
+                        vm.me.userName = res.body.data.userName;
+                        vm.me.icon = res.body.data.icon;
+                        vm.me.sec = sec;
 
                         this.connect();
                     }, function(res) {
@@ -165,20 +168,20 @@
                     });
                 },
                 initChat: function(targetId) {
-                    this.$http.post("queryChat", {loginId1: vm.loginId, loginId2: targetId, n: 200}, {emulateJSON: false}).then(function(res) {
+                    this.$http.post("queryChat", {loginId1: vm.me.loginId, loginId2: targetId, n: 200}, {emulateJSON: false}).then(function(res) {
                         if (!res.body.success) {
                             return;
                         }
 
                         res.body.data.forEach(function(item, idx) {
-                            console.log(item);
+
                             if (item.type=="business" && item.subType =="text") {
                                 var datacontent = JSON.parse(item.content);
 
-                                if (datacontent.senderId == vm.loginId) {
+                                if (datacontent.senderId == vm.me.loginId) {
                                     var param = {};
                                     param.direction = "sent";
-                                    param.senderId = vm.loginId;
+                                    param.senderId = vm.me.loginId;
                                     param.receivered = targetId;
                                     param.timestamp = datacontent.createdTime;
                                     param.type = "text";
@@ -189,7 +192,7 @@
                                     var param = {};
                                     param.direction = "received";
                                     param.senderId = targetId;
-                                    param.receiverId = vm.loginId;
+                                    param.receiverId = vm.me.loginId;
                                     param.timestamp = datacontent.createdTime;
                                     param.type = "text";
                                     param.content = datacontent.content;
@@ -204,7 +207,7 @@
                     });
                 },
                 initContactList: function() {
-                    this.$http.post("queryFriends", {loginId: this.loginId}, {emulateJSON: false}).then(function(res) {
+                    this.$http.post("queryFriends", {loginId: vm.me.loginId}, {emulateJSON: false}).then(function(res) {
                         if (!res.body.success) {
                             return;
                         }
@@ -256,7 +259,7 @@
                     param.subType = "text";
                     param.msgId = uuid();
                     param.content = {};
-                    param.content.senderId = this.loginId;
+                    param.content.senderId = vm.me.loginId;
                     param.content.receiverId = this.currentActive.loginId;
                     param.content.content = this.contentInput;
                     param.content = JSON.stringify(param.content);
@@ -266,7 +269,7 @@
 
                     param = {};
                     param.direction = "sent";
-                    param.senderId = this.loginId;
+                    param.senderId = vm.me.loginId;
                     param.receivered = this.currentActive.loginId;
                     param.timestamp = getFormatDate();
                     param.type = "text";
@@ -288,7 +291,7 @@
                         var param = {};
                         param.type = "connect";
                         param.msgId = uuid();
-                        param.content = vm.loginId;
+                        param.content = vm.me.loginId;
 
                         vm.socket.send(JSON.stringify(param));
                         //alert("websocket已打开");
@@ -304,7 +307,7 @@
                     //获得消息事件
                     this.socket.onmessage = function(msg) {
                         var data = JSON.parse(msg.data);
-                        //console.log(data);
+
                         if (data.type=="connect_ack") {
                             alert("connected");
                             vm.connected = true;
@@ -354,13 +357,12 @@
                             var param = {};
                             param.direction = "received";
                             param.senderId = datacontent.senderId;
-                            param.receiverId = vm.loginId;
+                            param.receiverId = vm.me.loginId;
                             param.timestamp = datacontent.createdTime;
                             param.type = "text";
                             param.content = datacontent.content;
 
                             //this.currentMessages.push(param);
-                            console.log(datacontent);
                             vm.messages[datacontent.senderId].push(param);
 
                             var param = {};
@@ -385,7 +387,6 @@
                 contacts: function (newContacts, oldContacts) {
                     newContacts.forEach(function(contact) {
                         if (!vm.messages.hasOwnProperty(contact.loginId)) {
-                            console.log(vm.messages);
                             vm.messages[contact.loginId] = [];
                         }
                     });

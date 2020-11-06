@@ -41,6 +41,12 @@ public class DefaultController {
             return WebResult.fail("Error001", "账号不存在");
         }*/
 
+        User user = userService.queryUser(param.getUserId());
+
+        if (null == user) {
+            return WebResult.fail("Error001", "账号不存在");
+        }
+
         if (!"123".equalsIgnoreCase(param.getPwd())) {
             return WebResult.fail("Error002", "密码不正确");
         }
@@ -61,7 +67,13 @@ public class DefaultController {
             return WebResult.fail("Error003", "非法访问");
         }
 
-        return WebResult.success();
+        User user = userService.queryUser(param.getLoginId());
+
+        if (null == user) {
+            return WebResult.fail("Error001", "账号不存在");
+        }
+
+        return WebResult.success(UserDto.from(user));
     }
 
     /*@RequestMapping("/onlineUsers")

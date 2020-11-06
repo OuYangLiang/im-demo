@@ -8,4 +8,6 @@ import java.util.List;
  */
 public interface UserService {
     List<User> queryFriends(String loginId);
+
+    User queryUser(String loginId);
 }

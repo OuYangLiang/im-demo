@@ -89,11 +89,13 @@ input[type=button] {
 .chat_box .message_box_received_header .user {
   float: left;
   font: bold;
+  font-size:70%;
 }
 
 .chat_box .message_box_received_header .timestamp {
   float: right;
   color: #92a8d1;
+  font-size:70%;
 }
 
 .chat_box .message_box_received_body .avatar {
@@ -102,7 +104,7 @@ input[type=button] {
 
 .chat_box .message_box_received_body .content {
   float: left;
-  background: #dddddd;
+  background: #E9967A;
   border: 1px solid black;
   border-radius: 8px;
   margin-top: 10px;
@@ -115,11 +117,13 @@ input[type=button] {
 .chat_box .message_box_send_header .user {
   float: right;
   font: bold;
+  font-size:70%;
 }
 
 .chat_box .message_box_send_header .timestamp {
   float: left;
   color: #92a8d1;
+    font-size:70%;
 }
 
 .chat_box .message_box_send_body .avatar {

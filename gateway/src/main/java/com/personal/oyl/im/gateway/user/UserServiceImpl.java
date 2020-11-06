@@ -27,6 +27,11 @@ public class UserServiceImpl implements UserService {
         return result.stream().filter((u) -> !u.getLoginId().equalsIgnoreCase(loginId)).collect(Collectors.toList());
     }
 
+    @Override
+    public User queryUser(String loginId) {
+        return userMapper.queryUser(loginId);
+    }
+
     @Autowired
     public void setUserMapper(UserMapper userMapper) {
         this.userMapper = userMapper;

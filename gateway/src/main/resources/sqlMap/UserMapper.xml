@@ -16,5 +16,12 @@
         order by `id`
     </select>
 
+    <select id="queryUser" resultMap="BaseResultMap">
+        select `id`, `login_id`, `user_name`, `password`, `icon`
+        from `user`
+        where `login_id` = #{param1,jdbcType=VARCHAR}
+        limit 1
+    </select>
+
 
 </mapper>
