@@ -19,14 +19,14 @@
 }
 
 .contact {
-  border: 2px solid black;
   border-radius: 4px;
   margin: 5px 10px 0px 10px;
   padding: 10px;
 }
 
 .contact_active {
-  background-color: #dddddd;
+  background-color: #F0F8FF;
+  border-style: inset;
 }
 
 .send_box {
@@ -104,7 +104,7 @@ input[type=button] {
 
 .chat_box .message_box_received_body .content {
   float: left;
-  background: #E9967A;
+  background: #FFF8DC;
   border: 1px solid black;
   border-radius: 8px;
   margin-top: 10px;
@@ -112,6 +112,7 @@ input[type=button] {
   padding: 7px;
   width: 350px;
   margin-bottom: 25px;
+  color: #8B0000;
 }
 
 .chat_box .message_box_send_header .user {
@@ -132,13 +133,14 @@ input[type=button] {
 
 .chat_box .message_box_send_body .content {
   float: right;
-  background: #00dd00;
+  background: #7FFFD4;
   border: 1px solid black;
   border-radius: 8px;
   margin-top: 10px;
   margin-right: 10px;
   padding: 7px;
   width: 350px;
+  color: #8A2BE2;
 }
 
 .clear_float {
