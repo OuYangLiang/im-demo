@@ -14,7 +14,24 @@
     <div class="total_box" id="app">
         <div class="contact_box">
             <div class="contact" v-bind:class="{ contact_active: contact.active }" v-for="contact of contacts" v-on:click="switchContact(contact.loginId)">
-                {{contact.userName}}
+                
+                <div class="contact_icon_box">
+                    <img class="icon" v-bind:src="'pic/' + contact.icon" alt="message user image">
+                </div>
+
+                <div class="contact_name_box">
+                    <div class="contact_name">
+                        {{contact.userName}}
+                    </div>
+                </div>
+
+                <div class="unread_box" v-if="contact.unread > 0">
+                    <div class="unread">
+                        <center>{{contact.unread}}</center>
+                    </div>
+                </div>
+
+                <div class="clear_float" ></div>
             </div>
             <!-- <div class="contact">
                 Lisa
@@ -167,8 +184,8 @@
                         }
                     });
                 },
-                initChat: function(targetId) {
-                    this.$http.post("queryChat", {loginId1: vm.me.loginId, loginId2: targetId, n: 200}, {emulateJSON: false}).then(function(res) {
+                initChat: function(contact) {
+                    this.$http.post("queryChat", {loginId1: vm.me.loginId, loginId2: contact.loginId, n: 200}, {emulateJSON: false}).then(function(res) {
                         if (!res.body.success) {
                             return;
                         }
@@ -177,25 +194,29 @@
 
                             if (item.type=="business" && item.subType =="text") {
                                 var datacontent = JSON.parse(item.content);
-
+                                console.log(datacontent);
                                 if (datacontent.senderId == vm.me.loginId) {
                                     var param = {};
                                     param.direction = "sent";
                                     param.senderId = vm.me.loginId;
-                                    param.receivered = targetId;
+                                    param.receivered = contact.loginId;
                                     param.timestamp = datacontent.createdTime;
                                     param.type = "text";
                                     param.content = datacontent.content;
 
-                                    vm.messages[targetId].push(param);
+                                    vm.messages[contact.loginId].push(param);
                                 } else {
                                     var param = {};
                                     param.direction = "received";
-                                    param.senderId = targetId;
+                                    param.senderId = contact.loginId;
                                     param.receiverId = vm.me.loginId;
                                     param.timestamp = datacontent.createdTime;
                                     param.type = "text";
                                     param.content = datacontent.content;
+
+                                    if ("read" != datacontent.status) {
+                                        contact.unread++;
+                                    }
 
                                     vm.messages[datacontent.senderId].push(param);
                                 }
@@ -218,11 +239,12 @@
                             obj.userName = item.userName;
                             obj.icon = item.icon;
                             obj.active = false;
+                            obj.unread = 0;
                             vm.contacts.push(obj);
                         });
 
                         vm.contacts.forEach(function(item, idx) {
-                            vm.initChat(item.loginId);
+                            vm.initChat(item);
                         });
                     }, function(res) {
                         console.log(res);
@@ -278,6 +300,13 @@
                     //this.currentMessages.push(param);
                     this.messages[vm.currentActive.loginId].push(param);
                     this.contentInput = '';
+                },
+                getContact: function(loginId) {
+                    for(i = 0, len = vm.contacts.length; i < len; i++) {
+                       if (vm.contacts[i].loginId == loginId) {
+                           return vm.contacts[i];
+                       }
+                    }
                 },
                 connect: function() {
                     if (this.socket!=null) {
@@ -364,6 +393,10 @@
 
                             //this.currentMessages.push(param);
                             vm.messages[datacontent.senderId].push(param);
+
+                            if (vm.currentActive.loginId != datacontent.senderId) {
+                                vm.getContact(datacontent.senderId).unread++;
+                            }
 
                             var param = {};
                             param.type = "business_ack";

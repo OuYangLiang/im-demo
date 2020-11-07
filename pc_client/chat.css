@@ -21,12 +21,56 @@
 .contact {
   border-radius: 4px;
   margin: 5px 10px 0px 10px;
-  padding: 10px;
+  height: 50px;
+  position: relative;
 }
 
 .contact_active {
   background-color: #F0F8FF;
   border-style: inset;
+}
+
+.contact_icon_box {
+  float: left;
+  //background-color: green;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.contact_name_box {
+  float: left;
+  //background-color: green;
+  margin-left: 7px;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.contact_name {
+  position: relative;
+}
+
+.unread_box {
+  float: right;
+  background-color: red;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.unread_box .unread {
+  color: yellow;
+  font-size: 75%;
+  width: 15px;
+  height: 15px;
+  margin: 0 auto;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .send_box {

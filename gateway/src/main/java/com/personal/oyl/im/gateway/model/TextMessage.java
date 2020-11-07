@@ -3,6 +3,7 @@ package com.personal.oyl.im.gateway.model;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.personal.oyl.im.gateway.im.Message;
+import com.personal.oyl.im.gateway.im.MessageStatus;
 
 import java.util.Date;
 
@@ -16,6 +17,7 @@ public class TextMessage {
     private String senderId;
     private String receiverId;
     private String content;
+    private MessageStatus status;
     private Date createdTime;
 
     public String getSenderId() {
@@ -42,6 +44,14 @@ public class TextMessage {
         this.content = content;
     }
 
+    public MessageStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(MessageStatus status) {
+        this.status = status;
+    }
+
     public Date getCreatedTime() {
         return createdTime;
     }
@@ -63,6 +73,7 @@ public class TextMessage {
         rlt.setSenderId(message.getSender());
         rlt.setReceiverId(message.getReceiver());
         rlt.setContent(message.getContent());
+        rlt.setStatus(message.getStatus());
         rlt.setCreatedTime(message.getCreatedTime());
         return rlt;
     }
