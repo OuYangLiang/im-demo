@@ -34,13 +34,20 @@
         limit 1
     </select>
 
-    <select id="queryUndelivered" resultMap="BaseResultMap">
+    <select id="queryByMsgId" resultMap="BaseResultMap">
+        select `id`, `sender`, `receiver`, `type`, `status`, `content`, `created_time`, `read_time`, `msg_id`
+        from `message`
+        where `msg_id` = #{param1,jdbcType=VARCHAR}
+        limit 1
+    </select>
+
+    <!--<select id="queryUndelivered" resultMap="BaseResultMap">
         select `id`, `sender`, `receiver`, `type`, `status`, `content`, `created_time`, `read_time`, `msg_id`
         from `message`
         where `status` = 0
         and `receiver` = #{param1,jdbcType=VARCHAR}
         order by id asc
-    </select>
+    </select>-->
 
     <select id="queryLastN" resultMap="BaseResultMap">
         select a.`id`, a.`sender`, a.`receiver`, a.`type`, a.`status`, a.`content`, a.`created_time`, a.`read_time`, a.`msg_id`
@@ -56,7 +63,24 @@
     <update id="onAck">
         update `message` set
         `status` = 1
-        where `msg_id` = #{param1}
+        where `msg_id` = #{param1} and `status` = 0
     </update>
+
+    <update id="onRead">
+        update `message` set
+        `status` = 2
+        where `id` in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
+    <select id="queryUnRead" resultMap="BaseResultMap">
+        select `id`, `sender`, `receiver`, `type`, `status`, `content`, `created_time`, `read_time`, `msg_id`
+        from `message`
+        where `status` in (0,1)
+        and `receiver` = #{param1,jdbcType=VARCHAR}
+        and `sender` = #{param2,jdbcType=VARCHAR}
+    </select>
 
 </mapper>

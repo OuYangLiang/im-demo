@@ -1,4 +1,4 @@
-package com.personal.oyl.im.gateway.model;
+package com.personal.oyl.im.gateway.model.message;
 
 /**
  * @author OuYang Liang

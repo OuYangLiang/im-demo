@@ -3,6 +3,10 @@ package com.personal.oyl.im.gateway;
 import com.personal.oyl.im.gateway.im.ImService;
 import com.personal.oyl.im.gateway.im.MessageType;
 import com.personal.oyl.im.gateway.model.*;
+import com.personal.oyl.im.gateway.model.message.Protocol;
+import com.personal.oyl.im.gateway.model.message.ProtocolType;
+import com.personal.oyl.im.gateway.model.message.ReadReply;
+import com.personal.oyl.im.gateway.model.message.TextMessage;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -29,8 +33,6 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
 
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, TextWebSocketFrame msg) {
-        System.out.println("Received: " + msg.text());
-
         Protocol protocol = Protocol.fromJson(msg.text());
 
         if (ProtocolType.heartbeat.equals(protocol.getType())) {
@@ -51,6 +53,9 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
             if (MessageType.text.equals(protocol.getSubType())) {
                 TextMessage message = TextMessage.fromJson(protocol.getContent());
                 imService.onTextMessage(protocol.getMsgId(), message);
+            } else if (MessageType.read_reply.equals(protocol.getSubType())) {
+                ReadReply reply = ReadReply.fromJson(protocol.getContent());
+                imService.clearUnRead(reply.getReceiver(), reply.getSender(), reply.getMsgId());
             }
         }
     }

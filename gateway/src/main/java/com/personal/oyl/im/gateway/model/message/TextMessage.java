@@ -1,4 +1,4 @@
-package com.personal.oyl.im.gateway.model;
+package com.personal.oyl.im.gateway.model.message;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

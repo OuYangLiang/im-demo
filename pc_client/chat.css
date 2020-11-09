@@ -113,19 +113,15 @@ input[type=button] {
   padding: 10px;
 }
 
-.chat_box .message_box_received_header,
-.message_box_send_header {
+.chat_box .message_box_received_header, .message_box_send_header {
   margin: auto;
   margin-top: 5px;
-  // border: 1px solid black;
   width: 530px;
   padding: 5px;
 }
 
-.chat_box .message_box_received_body,
-.message_box_send_body {
+.chat_box .message_box_received_body, .message_box_send_body {
   margin: auto;
-  //border: 1px solid black;
   width: 530px;
   padding: 5px;
 }
@@ -184,7 +180,24 @@ input[type=button] {
   margin-right: 10px;
   padding: 7px;
   width: 350px;
+  margin-bottom: 25px;
   color: #8A2BE2;
+}
+
+.chat_box .message_box_send_body .unread {
+  float: right;
+  margin-top: 30px;
+  margin-right: 5px;
+  font-size: 60%;
+  color: #6495ED;
+}
+
+.chat_box .message_box_send_body .read {
+  float: right;
+  margin-top: 30px;
+  margin-right: 5px;
+  font-size: 60%;
+  color: #A9A9A9;
 }
 
 .clear_float {

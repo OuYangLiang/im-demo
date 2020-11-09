@@ -1,7 +1,7 @@
 package com.personal.oyl.im.gateway.controller;
 
 import com.personal.oyl.im.gateway.im.ImService;
-import com.personal.oyl.im.gateway.model.Protocol;
+import com.personal.oyl.im.gateway.model.message.Protocol;
 import com.personal.oyl.im.gateway.user.User;
 import com.personal.oyl.im.gateway.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,6 +94,12 @@ public class DefaultController {
     @RequestMapping("/queryChat")
     public WebResult<List<Protocol>> queryChat(@RequestBody ChatQueryParam param) {
         return WebResult.success(imService.queryLastN(param.getLoginId1(), param.getLoginId2(), param.getN()));
+    }
+
+    @RequestMapping("/clearUnread")
+    public WebResult<Void> clearUnread(@RequestBody ClearUnReadParam param) {
+        imService.clearUnread(param.getReceiver(), param.getSender());
+        return WebResult.success();
     }
 
     @Autowired

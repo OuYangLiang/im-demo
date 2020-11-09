@@ -9,9 +9,15 @@ public interface MessageMapper {
 
     Message queryByKey(long id);
 
+    Message queryByMsgId(String msgId);
+
     List<Message> queryLastN(String identification, int n);
 
     int onAck(String msgId);
 
-    List<Message> queryUndelivered(String loginId);
+    //List<Message> queryUndelivered(String loginId);
+
+    int onRead(List<Long> list);
+
+    List<Message> queryUnRead(String receiver, String sender);
 }

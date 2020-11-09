@@ -1,9 +1,10 @@
 package com.personal.oyl.im.gateway.im;
 
 import com.personal.oyl.im.gateway.model.ConnectionMgr;
-import com.personal.oyl.im.gateway.model.Protocol;
-import com.personal.oyl.im.gateway.model.ProtocolType;
-import com.personal.oyl.im.gateway.model.TextMessage;
+import com.personal.oyl.im.gateway.model.message.Protocol;
+import com.personal.oyl.im.gateway.model.message.ProtocolType;
+import com.personal.oyl.im.gateway.model.message.ReadNotice;
+import com.personal.oyl.im.gateway.model.message.TextMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -68,6 +69,39 @@ public class ImServiceImpl implements ImService {
             pro.setContent(TextMessage.from(m).json());
             return pro;
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public void clearUnread(String receiver, String sender) {
+        List<Message> messages = messageMapper.queryUnRead(receiver, sender);
+
+        if (messages == null || messages.isEmpty()) {
+            return;
+        }
+
+        messageMapper.onRead(messages.stream().map(Message::getId).collect(Collectors.toList()));
+
+        if (connectionMgr.isUserOnline(sender)) {
+            connectionMgr.sendReadNotice(new ReadNotice(sender, receiver));
+        }
+    }
+
+    @Override
+    public void clearUnRead(String receiver, String sender, String msgId) {
+        Message message = messageMapper.queryByMsgId(msgId);
+
+        if (!message.getSender().equalsIgnoreCase(sender)) {
+            // TODO
+        }
+
+        if (!message.getReceiver().equalsIgnoreCase(receiver)) {
+            // TODO
+        }
+
+        messageMapper.onRead(Collections.singletonList(message.getId()));
+        if (connectionMgr.isUserOnline(sender)) {
+            connectionMgr.sendReadNotice(new ReadNotice(sender, receiver));
+        }
     }
 
     /*@Override

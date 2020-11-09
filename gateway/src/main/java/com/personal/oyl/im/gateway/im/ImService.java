@@ -1,7 +1,7 @@
 package com.personal.oyl.im.gateway.im;
 
-import com.personal.oyl.im.gateway.model.Protocol;
-import com.personal.oyl.im.gateway.model.TextMessage;
+import com.personal.oyl.im.gateway.model.message.Protocol;
+import com.personal.oyl.im.gateway.model.message.TextMessage;
 
 import java.util.List;
 
@@ -15,6 +15,10 @@ public interface ImService {
     void onAck(String msgId);
 
     List<Protocol> queryLastN(String loginId1, String loginId2, int n);
+
+    void clearUnread(String receiver, String sender);
+
+    void clearUnRead(String receiver, String sender, String msgId);
 
     //void onConnected(String loginId);
 }

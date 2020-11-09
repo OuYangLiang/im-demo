@@ -1,13 +1,15 @@
 package com.personal.oyl.im.gateway.model;
 
-import com.personal.oyl.im.gateway.im.ImService;
 import com.personal.oyl.im.gateway.im.Message;
 import com.personal.oyl.im.gateway.im.MessageType;
+import com.personal.oyl.im.gateway.model.message.Protocol;
+import com.personal.oyl.im.gateway.model.message.ProtocolType;
+import com.personal.oyl.im.gateway.model.message.ReadNotice;
+import com.personal.oyl.im.gateway.model.message.TextMessage;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -119,6 +121,17 @@ public class ConnectionMgrImpl implements ConnectionMgr {
 
         //this.queryChannel(userTo).writeAndFlush(new TextWebSocketFrame(protocol.toJson()));
         this.sendWrapper.send(this.queryChannel(message.getReceiver()), protocol);
+    }
+
+    @Override
+    public void sendReadNotice(ReadNotice notice) {
+        Protocol protocol = new Protocol();
+        protocol.setType(ProtocolType.business);
+        protocol.setMsgId(UUID.randomUUID().toString());
+        protocol.setSubType(MessageType.read_notice);
+        protocol.setContent(notice.json());
+
+        this.sendWrapper.send(this.queryChannel(notice.getSender()), protocol);
     }
 
     @Autowired

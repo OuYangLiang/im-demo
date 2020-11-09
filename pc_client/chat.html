@@ -13,8 +13,8 @@
 
     <div class="total_box" id="app">
         <div class="contact_box">
-            <div class="contact" v-bind:class="{ contact_active: contact.active }" v-for="contact of contacts" v-on:click="switchContact(contact.loginId)">
-                
+            <div class="contact" v-bind:class="{ contact_active: contact.active }" v-for="contact of contacts" v-on:click="switchContact(contact)">
+
                 <div class="contact_icon_box">
                     <img class="icon" v-bind:src="'pic/' + contact.icon" alt="message user image">
                 </div>
@@ -80,6 +80,13 @@
 
                     <div class="content">
                         {{message.content}}
+                    </div>
+
+                    <div class="read" v-if="message.status=='read'">
+                        已读
+                    </div>
+                    <div class="unread" v-else>
+                        未读
                     </div>
                 </div>
 
@@ -171,18 +178,33 @@
                         console.log(res);
                     });
                 },
-                switchContact: function(loginId) {
-                    vm.contacts.forEach(function(contact) {
-                        if (contact.active) {
-                            contact.active = false;
-                        }
+                switchContact: function(contact) {
 
-                        if (contact.loginId == loginId) {
-                            contact.active = true;
-                            vm.currentActive = contact;
-                            vm.currentMessages = vm.messages[loginId];
+                    vm.currentActive.active = false;
+                    contact.active = true;
+                    vm.currentActive = contact;
+                    vm.currentMessages = vm.messages[contact.loginId];
+                    contact.unread = 0;
+
+                    this.$http.post("clearUnread", {sender: contact.loginId, receiver: vm.me.loginId}, {emulateJSON: false}).then(function(res) {
+                        if (!res.body.success) {
+                            return;
                         }
+                    }, function(res) {
+                        console.log(res);
                     });
+
+                    // vm.contacts.forEach(function(contact) {
+                    //     if (contact.active) {
+                    //         contact.active = false;
+                    //     }
+                    //
+                    //     if (contact.loginId == contact.loginId) {
+                    //         contact.active = true;
+                    //         vm.currentActive = contact;
+                    //         vm.currentMessages = vm.messages[loginId];
+                    //     }
+                    // });
                 },
                 initChat: function(contact) {
                     this.$http.post("queryChat", {loginId1: vm.me.loginId, loginId2: contact.loginId, n: 200}, {emulateJSON: false}).then(function(res) {
@@ -194,7 +216,7 @@
 
                             if (item.type=="business" && item.subType =="text") {
                                 var datacontent = JSON.parse(item.content);
-                                console.log(datacontent);
+
                                 if (datacontent.senderId == vm.me.loginId) {
                                     var param = {};
                                     param.direction = "sent";
@@ -203,6 +225,7 @@
                                     param.timestamp = datacontent.createdTime;
                                     param.type = "text";
                                     param.content = datacontent.content;
+                                    param.status = datacontent.status;
 
                                     vm.messages[contact.loginId].push(param);
                                 } else {
@@ -213,6 +236,7 @@
                                     param.timestamp = datacontent.createdTime;
                                     param.type = "text";
                                     param.content = datacontent.content;
+                                    param.status = datacontent.status;
 
                                     if ("read" != datacontent.status) {
                                         contact.unread++;
@@ -295,6 +319,7 @@
                     param.receivered = this.currentActive.loginId;
                     param.timestamp = getFormatDate();
                     param.type = "text";
+                    param.status = 'initial';
                     param.content = this.contentInput;
 
                     //this.currentMessages.push(param);
@@ -338,7 +363,6 @@
                         var data = JSON.parse(msg.data);
 
                         if (data.type=="connect_ack") {
-                            alert("connected");
                             vm.connected = true;
                             return;
                         }
@@ -396,6 +420,40 @@
 
                             if (vm.currentActive.loginId != datacontent.senderId) {
                                 vm.getContact(datacontent.senderId).unread++;
+                            }
+
+                            var param = {};
+                            param.type = "business_ack";
+                            param.msgId = data.msgId;
+                            vm.socket.send(JSON.stringify(param));
+
+                            if (vm.currentActive.loginId == datacontent.senderId) {
+                                var param = {};
+                                param.type = "business";
+                                param.subType = "read_reply";
+                                param.msgId = uuid();
+                                param.content = {};
+                                param.content.sender = vm.currentActive.loginId;
+                                param.content.receiver = vm.me.loginId;
+                                param.content.msgId = data.msgId;
+                                param.content = JSON.stringify(param.content);
+
+                                //this.socket.send(JSON.stringify(param));
+                                vm.doSend(true, param.msgId, JSON.stringify(param));
+                            }
+                        }
+
+                        if (data.type=="business" && data.subType =="read_notice") {
+                            var datacontent = JSON.parse(data.content);
+
+                            console.log(datacontent);
+                            var messages = vm.messages[datacontent.receiver];
+                            console.log(messages);
+                            for(i = 0, len = messages.length; i < len; i++) {
+                                var message = messages[i];
+                                if (message.status != "read") {
+                                    message.status = "read";
+                                }
                             }
 
                             var param = {};

@@ -2,6 +2,8 @@ package com.personal.oyl.im.gateway.im;
 
 public enum MessageType {
     text(0),
+    read_notice(1),
+    read_reply(2),
     ;
 
     private int code;
