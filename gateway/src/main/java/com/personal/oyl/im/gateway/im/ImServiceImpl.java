@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -34,7 +35,22 @@ public class ImServiceImpl implements ImService {
 
         if (connectionMgr.isUserOnline(textMessage.getReceiverId())) {
             message = messageMapper.queryByKey(message.getId());
-            connectionMgr.sendTextMessage(message);
+
+            TextMessage param = new TextMessage();
+
+            param.setSenderId(message.getSender());
+            param.setReceiverId(message.getReceiver());
+            param.setContent(message.getContent());
+            param.setCreatedTime(message.getCreatedTime());
+            param.setStatus(MessageStatus.initial);
+
+            Protocol protocol = new Protocol();
+            protocol.setType(ProtocolType.business);
+            protocol.setMsgId(message.getMsgId());
+            protocol.setSubType(MessageType.text);
+            protocol.setContent(param.json());
+
+            connectionMgr.send(message.getReceiver(), protocol);
         }
     }
 
@@ -80,27 +96,34 @@ public class ImServiceImpl implements ImService {
         }
 
         messageMapper.onRead(messages.stream().map(Message::getId).collect(Collectors.toList()));
-
-        if (connectionMgr.isUserOnline(sender)) {
-            connectionMgr.sendReadNotice(new ReadNotice(sender, receiver));
-        }
+        this.noticeIfOnline(receiver, sender);
     }
 
     @Override
     public void clearUnRead(String receiver, String sender, String msgId) {
         Message message = messageMapper.queryByMsgId(msgId);
 
-        if (!message.getSender().equalsIgnoreCase(sender)) {
-            // TODO
+        /*if (!message.getSender().equalsIgnoreCase(sender)) {
+            //
         }
 
         if (!message.getReceiver().equalsIgnoreCase(receiver)) {
-            // TODO
-        }
+            //
+        }*/
 
         messageMapper.onRead(Collections.singletonList(message.getId()));
+        this.noticeIfOnline(receiver, sender);
+    }
+
+    private void noticeIfOnline(String receiver, String sender) {
         if (connectionMgr.isUserOnline(sender)) {
-            connectionMgr.sendReadNotice(new ReadNotice(sender, receiver));
+            Protocol protocol = new Protocol();
+            protocol.setType(ProtocolType.business);
+            protocol.setMsgId(UUID.randomUUID().toString());
+            protocol.setSubType(MessageType.read_notice);
+            protocol.setContent(new ReadNotice(sender, receiver).json());
+
+            connectionMgr.send(sender, protocol);
         }
     }
 

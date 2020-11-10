@@ -1,17 +1,11 @@
 package com.personal.oyl.im.gateway.model;
 
-import com.personal.oyl.im.gateway.im.Message;
-import com.personal.oyl.im.gateway.im.MessageType;
 import com.personal.oyl.im.gateway.model.message.Protocol;
-import com.personal.oyl.im.gateway.model.message.ProtocolType;
-import com.personal.oyl.im.gateway.model.message.ReadNotice;
-import com.personal.oyl.im.gateway.model.message.TextMessage;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -25,7 +19,6 @@ public class ConnectionMgrImpl implements ConnectionMgr {
     private static final Map<String, Channel> channels = new ConcurrentHashMap<>();
 
     private SendWrapper sendWrapper;
-//    private ImService imService;
 
     @Override
     public String queryUserId(String channelId) {
@@ -86,52 +79,9 @@ public class ConnectionMgrImpl implements ConnectionMgr {
         return channels.containsKey(loginId);
     }
 
-    /*@Override
-    public void sendTextMessage(String userFrom, String userTo, String message) {
-        TextMessage param = new TextMessage();
-
-        param.setSenderId(userFrom);
-        param.setReceiverId(userTo);
-        param.setContent(message);
-
-        Protocol protocol = new Protocol();
-        protocol.setType(ProtocolType.business);
-        protocol.setMsgId(UUID.randomUUID().toString());
-        protocol.setSubType(MessageType.text);
-        protocol.setContent(param.json());
-
-        //this.queryChannel(userTo).writeAndFlush(new TextWebSocketFrame(protocol.toJson()));
-        this.sendWrapper.send(this.queryChannel(userTo), protocol);
-    }*/
-
     @Override
-    public void sendTextMessage(Message message) {
-        TextMessage param = new TextMessage();
-
-        param.setSenderId(message.getSender());
-        param.setReceiverId(message.getReceiver());
-        param.setContent(message.getContent());
-        param.setCreatedTime(message.getCreatedTime());
-
-        Protocol protocol = new Protocol();
-        protocol.setType(ProtocolType.business);
-        protocol.setMsgId(message.getMsgId());
-        protocol.setSubType(MessageType.text);
-        protocol.setContent(param.json());
-
-        //this.queryChannel(userTo).writeAndFlush(new TextWebSocketFrame(protocol.toJson()));
-        this.sendWrapper.send(this.queryChannel(message.getReceiver()), protocol);
-    }
-
-    @Override
-    public void sendReadNotice(ReadNotice notice) {
-        Protocol protocol = new Protocol();
-        protocol.setType(ProtocolType.business);
-        protocol.setMsgId(UUID.randomUUID().toString());
-        protocol.setSubType(MessageType.read_notice);
-        protocol.setContent(notice.json());
-
-        this.sendWrapper.send(this.queryChannel(notice.getSender()), protocol);
+    public void send(String receiver, Protocol protocol) {
+        this.sendWrapper.send(this.queryChannel(receiver), protocol);
     }
 
     @Autowired
@@ -139,8 +89,4 @@ public class ConnectionMgrImpl implements ConnectionMgr {
         this.sendWrapper = sendWrapper;
     }
 
-    /*@Autowired
-    public void setImService(ImService imService) {
-        this.imService = imService;
-    }*/
 }

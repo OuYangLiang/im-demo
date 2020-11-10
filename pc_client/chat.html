@@ -346,9 +346,8 @@
                         param.type = "connect";
                         param.msgId = uuid();
                         param.content = vm.me.loginId;
+                        vm.doSend(true, param.msgId, JSON.stringify(param));
 
-                        vm.socket.send(JSON.stringify(param));
-                        //alert("websocket已打开");
                         vm.intervalId = setInterval(function() {
                             var param = {};
                             param.type = "heartbeat";
