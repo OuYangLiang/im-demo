@@ -96,12 +96,6 @@ public class DefaultController {
         return WebResult.success(imService.queryLastN(param.getLoginId1(), param.getLoginId2(), param.getN()));
     }
 
-    @RequestMapping("/clearUnread")
-    public WebResult<Void> clearUnread(@RequestBody ClearUnReadParam param) {
-        imService.clearUnread(param.getReceiver(), param.getSender());
-        return WebResult.success();
-    }
-
     @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;

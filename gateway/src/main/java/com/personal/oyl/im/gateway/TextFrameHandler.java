@@ -37,26 +37,35 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
 
         if (ProtocolType.heartbeat.equals(protocol.getType())) {
             ctx.writeAndFlush(new TextWebSocketFrame(protocol.toAck().toJson()));
+
         } else if (ProtocolType.connect.equals(protocol.getType())) {
             connectionMgr.markConnected(protocol.getContent(), ctx.channel());
             ctx.writeAndFlush(new TextWebSocketFrame(protocol.toAck().toJson()));
+
         } else if (ProtocolType.online_ack.equals(protocol.getType())) {
             sendWrapper.clear(protocol.getMsgId());
+
         } else if (ProtocolType.offline_ack.equals(protocol.getType())) {
             sendWrapper.clear(protocol.getMsgId());
+
         } else if (ProtocolType.business_ack.equals(protocol.getType())) {
             sendWrapper.clear(protocol.getMsgId());
             imService.onAck(protocol.getMsgId());
-        } else if (ProtocolType.business.equals(protocol.getType())) {
-            ctx.writeAndFlush(new TextWebSocketFrame(protocol.toAck().toJson()));
 
+        } else if (ProtocolType.business.equals(protocol.getType())) {
             if (MessageType.text.equals(protocol.getSubType())) {
                 TextMessage message = TextMessage.fromJson(protocol.getContent());
                 imService.onTextMessage(protocol.getMsgId(), message);
             } else if (MessageType.read_reply.equals(protocol.getSubType())) {
                 ReadReply reply = ReadReply.fromJson(protocol.getContent());
-                imService.clearUnRead(reply.getReceiver(), reply.getSender(), reply.getMsgId());
+                if (null == reply.getMsgId()) {
+                    imService.clearUnread(reply.getReceiver(), reply.getSender());
+                } else {
+                    imService.clearUnRead(reply.getReceiver(), reply.getSender(), reply.getMsgId());
+                }
             }
+
+            ctx.writeAndFlush(new TextWebSocketFrame(protocol.toAck().toJson()));
         }
     }
 

@@ -25,6 +25,10 @@ public class ImServiceImpl implements ImService {
 
     @Override
     public void onTextMessage(String msgId, TextMessage textMessage) {
+        if (null != messageMapper.queryByMsgId(msgId)) {
+            return;
+        }
+
         Message message = new Message();
         message.setSender(textMessage.getSenderId());
         message.setReceiver(textMessage.getReceiverId());

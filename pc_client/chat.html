@@ -186,25 +186,17 @@
                     vm.currentMessages = vm.messages[contact.loginId];
                     contact.unread = 0;
 
-                    this.$http.post("clearUnread", {sender: contact.loginId, receiver: vm.me.loginId}, {emulateJSON: false}).then(function(res) {
-                        if (!res.body.success) {
-                            return;
-                        }
-                    }, function(res) {
-                        console.log(res);
-                    });
+                    var param = {};
+                    param.type = "business";
+                    param.subType = "read_reply";
+                    param.msgId = uuid();
+                    param.content = {};
+                    param.content.sender = contact.loginId;
+                    param.content.receiver = vm.me.loginId;
+                    param.content = JSON.stringify(param.content);
 
-                    // vm.contacts.forEach(function(contact) {
-                    //     if (contact.active) {
-                    //         contact.active = false;
-                    //     }
-                    //
-                    //     if (contact.loginId == contact.loginId) {
-                    //         contact.active = true;
-                    //         vm.currentActive = contact;
-                    //         vm.currentMessages = vm.messages[loginId];
-                    //     }
-                    // });
+                    vm.doSend(true, param.msgId, JSON.stringify(param));
+
                 },
                 initChat: function(contact) {
                     this.$http.post("queryChat", {loginId1: vm.me.loginId, loginId2: contact.loginId, n: 200}, {emulateJSON: false}).then(function(res) {
@@ -375,35 +367,6 @@
                             return;
                         }
 
-                        // if (data.type=="online") {
-                        //     var obj = {};
-                        //     obj.userId = data.content;
-                        //     obj.active = false;
-                        //     vm.contacts.push(obj);
-                        //
-                        //     var param = {};
-                        //     param.type = "online_ack";
-                        //     param.msgId = data.msgId;
-                        //     vm.socket.send(JSON.stringify(param));
-                        //
-                        //     return;
-                        // }
-
-                        // if (data.type=="offline") {
-                        //     for(i = 0, len = vm.contacts.length; i < len; i++) {
-                        //         if (vm.contacts[i].userId == data.content) {
-                        //             vm.contacts.splice(i,1);
-                        //         }
-                        //     }
-                        //
-                        //     var param = {};
-                        //     param.type = "offline_ack";
-                        //     param.msgId = data.msgId;
-                        //     vm.socket.send(JSON.stringify(param));
-                        //
-                        //     return;
-                        // }
-
                         if (data.type=="business" && data.subType =="text") {
                             var datacontent = JSON.parse(data.content);
                             var param = {};
@@ -444,10 +407,8 @@
 
                         if (data.type=="business" && data.subType =="read_notice") {
                             var datacontent = JSON.parse(data.content);
-
-                            console.log(datacontent);
                             var messages = vm.messages[datacontent.receiver];
-                            console.log(messages);
+
                             for(i = 0, len = messages.length; i < len; i++) {
                                 var message = messages[i];
                                 if (message.status != "read") {
