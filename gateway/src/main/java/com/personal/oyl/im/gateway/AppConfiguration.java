@@ -1,5 +1,6 @@
 package com.personal.oyl.im.gateway;
 
+import com.personal.oyl.im.gateway.im.GroupMessageMapper;
 import com.personal.oyl.im.gateway.im.MessageMapper;
 import com.personal.oyl.im.gateway.user.UserMapper;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -18,6 +19,14 @@ public class AppConfiguration {
         MapperFactoryBean<MessageMapper> factory = new MapperFactoryBean<>();
         factory.setSqlSessionFactory(sqlSessionFactory);
         factory.setMapperInterface(MessageMapper.class);
+        return factory.getObject();
+    }
+
+    @Bean
+    public GroupMessageMapper groupMessageMapper(SqlSessionFactory sqlSessionFactory) throws Exception {
+        MapperFactoryBean<GroupMessageMapper> factory = new MapperFactoryBean<>();
+        factory.setSqlSessionFactory(sqlSessionFactory);
+        factory.setMapperInterface(GroupMessageMapper.class);
         return factory.getObject();
     }
 

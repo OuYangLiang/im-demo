@@ -1,10 +1,9 @@
 package com.personal.oyl.im.gateway.im;
 
 import com.personal.oyl.im.gateway.model.ConnectionMgr;
-import com.personal.oyl.im.gateway.model.message.Protocol;
-import com.personal.oyl.im.gateway.model.message.ProtocolType;
-import com.personal.oyl.im.gateway.model.message.ReadNotice;
-import com.personal.oyl.im.gateway.model.message.TextMessage;
+import com.personal.oyl.im.gateway.model.message.*;
+import com.personal.oyl.im.gateway.user.User;
+import com.personal.oyl.im.gateway.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +21,8 @@ public class ImServiceImpl implements ImService {
 
     private ConnectionMgr connectionMgr;
     private MessageMapper messageMapper;
+    private GroupMessageMapper groupMessageMapper;
+    private UserService userService;
 
     @Override
     public void onTextMessage(String msgId, TextMessage textMessage) {
@@ -56,6 +57,58 @@ public class ImServiceImpl implements ImService {
 
             connectionMgr.send(message.getReceiver(), protocol);
         }
+    }
+
+    @Override
+    public void onGroupTextMessage(String msgId, GroupTextMessage textMessage) {
+        if (null != groupMessageMapper.queryByMsgId(msgId)) {
+            return;
+        }
+
+        GroupMessage message = new GroupMessage();
+        message.setSender(textMessage.getSenderId());
+        message.setGroupId(textMessage.getGroupId());
+        message.setType(MessageType.text);
+        message.setContent(textMessage.getContent());
+        message.setMsgId(msgId);
+        groupMessageMapper.insert(message);
+
+        List<User> users = userService.queryUserByGroup(textMessage.getGroupId());
+
+        for (User user : users) {
+            if (user.getLoginId().equalsIgnoreCase(textMessage.getSenderId())) {
+                continue;
+            }
+
+            groupMessageMapper.insertRead(textMessage.getGroupId(), msgId, user.getLoginId());
+        }
+
+        message = groupMessageMapper.queryByKey(message.getId());
+        for (User user : users) {
+            if (user.getLoginId().equalsIgnoreCase(textMessage.getSenderId())) {
+                continue;
+            }
+
+            if (connectionMgr.isUserOnline(user.getLoginId())) {
+                GroupTextMessage param = new GroupTextMessage();
+
+                param.setSenderId(message.getSender());
+                param.setReceiverId(user.getLoginId());
+                param.setGroupId(textMessage.getGroupId());
+                param.setContent(message.getContent());
+                param.setCreatedTime(message.getCreatedTime());
+                param.setStatus(MessageStatus.initial);
+
+                Protocol protocol = new Protocol();
+                protocol.setType(ProtocolType.business);
+                protocol.setMsgId(message.getMsgId());
+                protocol.setSubType(MessageType.group_text);
+                protocol.setContent(param.json());
+
+                connectionMgr.send(user.getLoginId(), protocol);
+            }
+        }
+
     }
 
     @Override
@@ -119,6 +172,38 @@ public class ImServiceImpl implements ImService {
         this.noticeIfOnline(receiver, sender);
     }
 
+    @Override
+    public void clearGroupUnRead(String group, String receiver) {
+        List<Long> ids = groupMessageMapper.queryReadIds(receiver, group);
+        if (null == ids || ids.isEmpty()) {
+            return;
+        }
+
+        groupMessageMapper.onRead(ids);
+        // notice, but the sender may be more than one, depends on the msg itself
+    }
+
+    @Override
+    public void clearGroupUnRead(String group, String receiver, String msgId) {
+        Long id = groupMessageMapper.queryReadIdByKey(receiver, msgId);
+
+        if (null != id) {
+            groupMessageMapper.onRead(Collections.singletonList(id));
+
+            GroupMessage message = groupMessageMapper.queryByMsgId(msgId);
+
+            if (connectionMgr.isUserOnline(message.getSender())) {
+                Protocol protocol = new Protocol();
+                protocol.setType(ProtocolType.business);
+                protocol.setMsgId(UUID.randomUUID().toString());
+                protocol.setSubType(MessageType.group_read_notice);
+                protocol.setContent(new GroupReadNotice(receiver, group, message.getSender()).json());
+
+                connectionMgr.send(message.getSender(), protocol);
+            }
+        }
+    }
+
     private void noticeIfOnline(String receiver, String sender) {
         if (connectionMgr.isUserOnline(sender)) {
             Protocol protocol = new Protocol();
@@ -149,5 +234,15 @@ public class ImServiceImpl implements ImService {
     @Autowired
     public void setMessageMapper(MessageMapper messageMapper) {
         this.messageMapper = messageMapper;
+    }
+
+    @Autowired
+    public void setGroupMessageMapper(GroupMessageMapper groupMessageMapper) {
+        this.groupMessageMapper = groupMessageMapper;
+    }
+
+    @Autowired
+    public void setUserService(UserService userService) {
+        this.userService = userService;
     }
 }

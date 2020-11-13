@@ -23,6 +23,34 @@ create table if not exists `user` (
   unique key (`login_id`)
 ) engine=innodb default charset=utf8mb4 comment='用户表';
 
+create table if not exists `group_message` (
+  `id`              bigint        not null  auto_increment comment '主键',
+  `sender`          varchar(50)   not null comment '发送方ID',
+  `group_id`        varchar(50)   not null comment '接收方ID',
+  `type`            tinyint       not null comment '消息类型',
+  `content`         varchar(255)  not null comment '消息内容',
+  `created_time`    datetime      not null default current_timestamp comment '创建时间',
+  `msg_id`          char(36)      not null comment '客户端消息唯一ID',
+  primary key (`id`)
+) engine=innodb default charset=utf8mb4 comment='群消息表';
+
+create table if not exists `group_message_read` (
+  `id`                  bigint        not null  auto_increment comment '主键',
+  `group_id`            varchar(50)   not null comment '接收方ID',
+  `msg_id`              char(36)      not null comment '客户端消息唯一ID',
+  `receiver`            varchar(50)   not null comment '接收方ID',
+  `status`              tinyint       not null comment '消息状态: 0->初始，1->已投递，2->已读',
+  `read_time`           datetime      not null default current_timestamp comment '已读时间',
+  primary key (`id`)
+) engine=innodb default charset=utf8mb4 comment='群消息已读表';
+
+create table if not exists `group_rel` (
+  `id`                  bigint        not null  auto_increment comment '主键',
+  `group_id`            varchar(50)   not null comment '群ID',
+  `login_id`            varchar(50)   not null comment '账号',
+  primary key (`id`)
+) engine=innodb default charset=utf8mb4 comment='群成员表';
+
 insert into `user`(`login_id`, `user_name`, `password`, `icon`) values
 ('oyl', '欧阳亮', '3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2', 'oyl.jpg'),
 ('A1019088', '周啸天', '3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2', 'A1019088.jpg'),
@@ -37,3 +65,12 @@ insert into `user`(`login_id`, `user_name`, `password`, `icon`) values
 ('A1018578', '王涛', '3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2', 'A1018578.jpg');
 
 
+insert into `user`(`login_id`, `user_name`, `password`, `icon`) values
+('oyl', '欧阳亮', '3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2', 'oyl.jpg'),
+('zxt', '周啸天', '3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2', 'A1019088.jpg'),
+('ynh', '杨能慧', '3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2', 'Y0010081.jpg');
+
+insert into `group_rel`(`group_id`, `login_id`) values
+('group', 'oyl'),
+('group', 'zxt'),
+('group', 'ynh');

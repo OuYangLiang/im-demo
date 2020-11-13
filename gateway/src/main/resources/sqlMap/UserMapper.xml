@@ -23,5 +23,12 @@
         limit 1
     </select>
 
+    <select id="queryUserByGroup" resultMap="BaseResultMap">
+        select a.`id`, a.`login_id`, a.`user_name`, a.`password`, a.`icon`
+        from `user` a, `group_rel` b
+        where a.`login_id` = b.`login_id`
+        and b.`group_id` = #{param1,jdbcType=VARCHAR}
+    </select>
+
 
 </mapper>

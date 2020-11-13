@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.personal.oyl.im.gateway.im.GroupMessageMapper">
+	<resultMap id="BaseResultMap" type="com.personal.oyl.im.gateway.im.GroupMessage">
+        <result column="id" property="id" jdbcType="BIGINT" />
+        <result column="sender" property="sender" jdbcType="VARCHAR" />
+        <result column="group_id" property="groupId" jdbcType="VARCHAR" />
+        <result column="type" property="type" typeHandler="com.personal.oyl.im.gateway.im.MessageTypeHandler" />
+        <result column="content" property="content" jdbcType="VARCHAR" />
+        <result column="created_time" property="createdTime" jdbcType="TIMESTAMP" />
+        <result column="msg_id" property="msgId" jdbcType="VARCHAR" />
+	</resultMap>
+
+    <resultMap id="BaseResultReadMap" type="com.personal.oyl.im.gateway.im.GroupMessageRead">
+        <result column="id" property="id" jdbcType="BIGINT" />
+        <result column="group_id" property="groupId" jdbcType="VARCHAR" />
+        <result column="msg_id" property="msgId" jdbcType="VARCHAR" />
+        <result column="receiver" property="receiver" jdbcType="VARCHAR" />
+        <result column="status" property="status" typeHandler="com.personal.oyl.im.gateway.im.MessageStatusHandler" />
+        <result column="read_time" property="readTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <select id="queryByKey" resultMap="BaseResultMap">
+        select `id`, `sender`, `group_id`, `type`, `content`, `created_time`, `msg_id`
+        from `group_message`
+        where `id` = #{param1,jdbcType=VARCHAR}
+        limit 1
+    </select>
+
+    <select id="queryByMsgId" resultMap="BaseResultMap">
+        select `id`, `sender`, `group_id`, `type`, `content`, `created_time`, `msg_id`
+        from `group_message`
+        where `msg_id` = #{param1,jdbcType=VARCHAR}
+        limit 1
+    </select>
+
+    <insert id="insert" parameterType="com.personal.oyl.im.gateway.im.GroupMessage" useGeneratedKeys="true" keyProperty="id">
+        insert into `group_message`(
+            `sender`, `group_id`, `type`, `content`, `msg_id`
+        ) values (
+            #{sender,jdbcType=VARCHAR},
+            #{groupId,jdbcType=VARCHAR},
+            #{type,typeHandler=com.personal.oyl.im.gateway.im.MessageTypeHandler},
+            #{content,jdbcType=VARCHAR},
+            #{msgId,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <insert id="insertRead" >
+        insert into `group_message_read`(
+            `group_id`, `msg_id`, `receiver`, `status`
+        ) values (
+            #{param1,jdbcType=VARCHAR},
+            #{param2,jdbcType=VARCHAR},
+            #{param3,jdbcType=VARCHAR},
+            0
+        )
+    </insert>
+
+    <update id="onRead">
+        update `group_message_read` set
+        `status` = 2
+        where `id` in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
+    <select id="queryReadIdByKey" resultType="long">
+        select `id`
+        from `group_message_read`
+        where `receiver` = #{param1,jdbcType=VARCHAR}
+        and `msg_id` = #{param2,jdbcType=VARCHAR}
+        limit 1
+    </select>
+
+    <select id="queryReadIds" resultType="long">
+        select `id`
+        from `group_message_read`
+        where `receiver` = #{param1,jdbcType=VARCHAR}
+        and `group_id` = #{param2,jdbcType=VARCHAR}
+        and `status` in (0,1)
+    </select>
+</mapper>

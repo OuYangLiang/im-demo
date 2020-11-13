@@ -32,6 +32,17 @@ public class UserServiceImpl implements UserService {
         return userMapper.queryUser(loginId);
     }
 
+    @Override
+    public List<User> queryUserByGroup(String groupId) {
+        List<User> result = userMapper.queryUserByGroup(groupId);
+
+        if (null == result || result.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return result;
+    }
+
     @Autowired
     public void setUserMapper(UserMapper userMapper) {
         this.userMapper = userMapper;

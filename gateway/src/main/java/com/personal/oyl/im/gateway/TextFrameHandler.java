@@ -3,10 +3,7 @@ package com.personal.oyl.im.gateway;
 import com.personal.oyl.im.gateway.im.ImService;
 import com.personal.oyl.im.gateway.im.MessageType;
 import com.personal.oyl.im.gateway.model.*;
-import com.personal.oyl.im.gateway.model.message.Protocol;
-import com.personal.oyl.im.gateway.model.message.ProtocolType;
-import com.personal.oyl.im.gateway.model.message.ReadReply;
-import com.personal.oyl.im.gateway.model.message.TextMessage;
+import com.personal.oyl.im.gateway.model.message.*;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -56,6 +53,7 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
             if (MessageType.text.equals(protocol.getSubType())) {
                 TextMessage message = TextMessage.fromJson(protocol.getContent());
                 imService.onTextMessage(protocol.getMsgId(), message);
+
             } else if (MessageType.read_reply.equals(protocol.getSubType())) {
                 ReadReply reply = ReadReply.fromJson(protocol.getContent());
                 if (null == reply.getMsgId()) {
@@ -63,6 +61,19 @@ public class TextFrameHandler extends SimpleChannelInboundHandler<TextWebSocketF
                 } else {
                     imService.clearUnRead(reply.getReceiver(), reply.getSender(), reply.getMsgId());
                 }
+
+            } else if (MessageType.group_text.equals(protocol.getSubType())) {
+                GroupTextMessage message = GroupTextMessage.fromJson(protocol.getContent());
+                imService.onGroupTextMessage(protocol.getMsgId(), message);
+
+            } else if (MessageType.group_read_reply.equals(protocol.getSubType())) {
+                GroupReadReply reply = GroupReadReply.fromJson(protocol.getContent());
+                if (null == reply.getMsgId()) {
+                    imService.clearGroupUnRead(reply.getGroup(), reply.getReceiver());
+                } else {
+                    imService.clearGroupUnRead(reply.getGroup(), reply.getReceiver(), reply.getMsgId());
+                }
+
             }
 
             ctx.writeAndFlush(new TextWebSocketFrame(protocol.toAck().toJson()));

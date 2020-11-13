@@ -6,4 +6,6 @@ public interface UserMapper {
     List<User> queryAll();
 
     User queryUser(String loginId);
+
+    List<User> queryUserByGroup(String groupId);
 }

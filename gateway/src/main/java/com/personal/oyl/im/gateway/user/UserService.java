@@ -10,4 +10,6 @@ public interface UserService {
     List<User> queryFriends(String loginId);
 
     User queryUser(String loginId);
+
+    List<User> queryUserByGroup(String groupId);
 }

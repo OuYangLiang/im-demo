@@ -1,6 +1,7 @@
 package com.personal.oyl.im.gateway.controller;
 
 import com.personal.oyl.im.gateway.im.ImService;
+import com.personal.oyl.im.gateway.model.message.GroupTextMessage;
 import com.personal.oyl.im.gateway.model.message.Protocol;
 import com.personal.oyl.im.gateway.user.User;
 import com.personal.oyl.im.gateway.user.UserService;
@@ -89,6 +90,22 @@ public class DefaultController {
         }
 
         return WebResult.success(users.stream().map(UserDto::from).collect(Collectors.toList()));
+    }
+
+    @RequestMapping("/queryGroups")
+    public WebResult<List<GroupDto>> queryGroups(@RequestBody GroupQueryParam param) {
+        String groupId = "group";
+        GroupDto result = new GroupDto();
+        result.setGroupId(groupId);
+        result.setGroupName("满帮CRM");
+        result.setIcon("group.jpg");
+
+        List<User> users = userService.queryUserByGroup(groupId);
+        List<UserDto> members = (null == users || users.isEmpty()) ? Collections.emptyList() :
+                users.stream().filter((u)-> !u.getLoginId().equalsIgnoreCase(param.getLoginId())).map(UserDto::from).collect(Collectors.toList());
+        result.setMembers(members);
+
+        return WebResult.success(Collections.singletonList(result));
     }
 
     @RequestMapping("/queryChat")

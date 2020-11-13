@@ -4,6 +4,9 @@ public enum MessageType {
     text(0),
     read_notice(1),
     read_reply(2),
+    group_text(3),
+    group_read_notice(4),
+    group_read_reply(5),
     ;
 
     private int code;

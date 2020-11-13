@@ -1,5 +1,6 @@
 package com.personal.oyl.im.gateway.im;
 
+import com.personal.oyl.im.gateway.model.message.GroupTextMessage;
 import com.personal.oyl.im.gateway.model.message.Protocol;
 import com.personal.oyl.im.gateway.model.message.TextMessage;
 
@@ -17,6 +18,14 @@ public interface ImService {
      * @param textMessage 文本消息对象
      */
     void onTextMessage(String msgId, TextMessage textMessage);
+
+    /**
+     * 群聊文本消息
+     *
+     * @param msgId 客户端消息ID
+     * @param textMessage 群聊文本消息对象
+     */
+    void onGroupTextMessage(String msgId, GroupTextMessage textMessage);
 
     /**
      * 消息确认
@@ -51,6 +60,23 @@ public interface ImService {
      * @param msgId 消息ID
      */
     void clearUnRead(String receiver, String sender, String msgId);
+
+    /**
+     * 置已读状态
+     *
+     * @param group 群ID
+     * @param receiver 接收方ID
+     */
+    void clearGroupUnRead(String group, String receiver);
+
+    /**
+     * 置已读状态
+     *
+     * @param group 群ID
+     * @param receiver 接收方ID
+     * @param msgId 消息ID
+     */
+    void clearGroupUnRead(String group, String receiver, String msgId);
 
     //void onConnected(String loginId);
 }
