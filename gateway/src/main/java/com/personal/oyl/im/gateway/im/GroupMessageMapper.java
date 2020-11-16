@@ -5,6 +5,8 @@ import java.util.List;
 public interface GroupMessageMapper {
     GroupMessage queryByMsgId(String msgId);
 
+    List<GroupMessage> queryByMsgIds(List<String> list);
+
     GroupMessage queryByKey(long id);
 
     void insert(GroupMessage message);
@@ -13,7 +15,7 @@ public interface GroupMessageMapper {
 
     int onRead(List<Long> list);
 
-    Long queryReadIdByKey(String receiver, String msgId);
+    GroupMessageRead queryGroupMessageReadByKey(String receiver, String msgId);
 
-    List<Long> queryReadIds(String receiver, String group);
+    List<GroupMessageRead> queryUnreadGroupMessageRead(String receiver, String group);
 }

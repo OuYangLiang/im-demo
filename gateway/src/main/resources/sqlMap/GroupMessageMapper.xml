@@ -34,6 +34,15 @@
         limit 1
     </select>
 
+    <select id="queryByMsgIds" resultMap="BaseResultMap">
+        select `id`, `sender`, `group_id`, `type`, `content`, `created_time`, `msg_id`
+        from `group_message`
+        where `msg_id` in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+    </select>
+
     <insert id="insert" parameterType="com.personal.oyl.im.gateway.im.GroupMessage" useGeneratedKeys="true" keyProperty="id">
         insert into `group_message`(
             `sender`, `group_id`, `type`, `content`, `msg_id`
@@ -66,16 +75,16 @@
         </foreach>
     </update>
 
-    <select id="queryReadIdByKey" resultType="long">
-        select `id`
+    <select id="queryGroupMessageReadByKey" resultMap="BaseResultReadMap">
+        select `id`, `group_id`, `msg_id`, `receiver`, `status`, `read_time`
         from `group_message_read`
         where `receiver` = #{param1,jdbcType=VARCHAR}
         and `msg_id` = #{param2,jdbcType=VARCHAR}
         limit 1
     </select>
 
-    <select id="queryReadIds" resultType="long">
-        select `id`
+    <select id="queryUnreadGroupMessageRead" resultMap="BaseResultReadMap">
+        select `id`, `group_id`, `msg_id`, `receiver`, `status`, `read_time`
         from `group_message_read`
         where `receiver` = #{param1,jdbcType=VARCHAR}
         and `group_id` = #{param2,jdbcType=VARCHAR}

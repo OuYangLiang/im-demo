@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -159,39 +160,44 @@ public class ImServiceImpl implements ImService {
     @Override
     public void clearUnRead(String receiver, String sender, String msgId) {
         Message message = messageMapper.queryByMsgId(msgId);
-
-        /*if (!message.getSender().equalsIgnoreCase(sender)) {
-            //
-        }
-
-        if (!message.getReceiver().equalsIgnoreCase(receiver)) {
-            //
-        }*/
-
         messageMapper.onRead(Collections.singletonList(message.getId()));
         this.noticeIfOnline(receiver, sender);
     }
 
     @Override
     public void clearGroupUnRead(String group, String receiver) {
-        List<Long> ids = groupMessageMapper.queryReadIds(receiver, group);
-        if (null == ids || ids.isEmpty()) {
+        List<GroupMessageRead> lists = groupMessageMapper.queryUnreadGroupMessageRead(receiver, group);
+
+        if (null == lists || lists.isEmpty()) {
             return;
         }
 
-        groupMessageMapper.onRead(ids);
-        // notice, but the sender may be more than one, depends on the msg itself
+        groupMessageMapper.onRead(lists.stream().map(GroupMessageRead::getId).collect(Collectors.toList()));
+
+        List<GroupMessage> messages = groupMessageMapper.queryByMsgIds(lists.stream().map(GroupMessageRead::getMsgId).collect(Collectors.toList()));
+        Set<String> senders = messages.stream().map(GroupMessage::getSender).collect(Collectors.toSet());
+
+        for (String sender : senders) {
+            if (connectionMgr.isUserOnline(sender)) {
+                Protocol protocol = new Protocol();
+                protocol.setType(ProtocolType.business);
+                protocol.setMsgId(UUID.randomUUID().toString());
+                protocol.setSubType(MessageType.group_read_notice);
+                protocol.setContent(new GroupReadNotice(receiver, group, sender).json());
+
+                connectionMgr.send(sender, protocol);
+            }
+        }
     }
 
     @Override
     public void clearGroupUnRead(String group, String receiver, String msgId) {
-        Long id = groupMessageMapper.queryReadIdByKey(receiver, msgId);
+        GroupMessageRead groupMessageRead = groupMessageMapper.queryGroupMessageReadByKey(receiver, msgId);
 
-        if (null != id) {
-            groupMessageMapper.onRead(Collections.singletonList(id));
+        if (null != groupMessageRead) {
+            groupMessageMapper.onRead(Collections.singletonList(groupMessageRead.getId()));
 
             GroupMessage message = groupMessageMapper.queryByMsgId(msgId);
-
             if (connectionMgr.isUserOnline(message.getSender())) {
                 Protocol protocol = new Protocol();
                 protocol.setType(ProtocolType.business);

@@ -560,9 +560,12 @@
 
                             for(i = 0, len = messages.length; i < len; i++) {
                                 var message = messages[i];
-                                if (message.unread.has(datacontent.receiver)) {
-                                    message.unreadCnt--;
-                                    message.unread.delete(datacontent.receiver);
+                                if (message.direction == "sent")
+                                {
+                                    if (message.unread.has(datacontent.receiver)) {
+                                        message.unreadCnt--;
+                                        message.unread.delete(datacontent.receiver);
+                                    }
                                 }
                             }
 
