@@ -90,4 +90,19 @@
         and `group_id` = #{param2,jdbcType=VARCHAR}
         and `status` in (0,1)
     </select>
+
+    <select id="queryLastGroupN" resultMap="BaseResultMap">
+        select `id`, `sender`, `group_id`, `type`, `content`, `created_time`, `msg_id`
+        from `group_message`
+        where `group_id` = #{param1,jdbcType=VARCHAR}
+        order by `id` desc
+        limit ${param2}
+    </select>
+
+    <select id="queryUnreadGroupMessageReadByMsgId" resultMap="BaseResultReadMap">
+        select `id`, `group_id`, `msg_id`, `receiver`, `status`, `read_time`
+        from `group_message_read`
+        where `msg_id` = #{param1,jdbcType=VARCHAR}
+        and `status` in (0,1)
+    </select>
 </mapper>

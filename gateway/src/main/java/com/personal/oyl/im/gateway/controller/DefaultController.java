@@ -113,6 +113,11 @@ public class DefaultController {
         return WebResult.success(imService.queryLastN(param.getLoginId1(), param.getLoginId2(), param.getN()));
     }
 
+    @RequestMapping("/queryGroupChat")
+    public WebResult<List<Protocol>> queryGropuChat(@RequestBody GroupChatQueryParam param) {
+        return WebResult.success(imService.queryLastGroupN(param.getSender(), param.getGroup(), param.getN()));
+    }
+
     @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;

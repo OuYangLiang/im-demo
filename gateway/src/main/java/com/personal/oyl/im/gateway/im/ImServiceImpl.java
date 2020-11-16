@@ -7,10 +7,7 @@ import com.personal.oyl.im.gateway.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -69,7 +66,7 @@ public class ImServiceImpl implements ImService {
         GroupMessage message = new GroupMessage();
         message.setSender(textMessage.getSenderId());
         message.setGroupId(textMessage.getGroupId());
-        message.setType(MessageType.text);
+        message.setType(MessageType.group_text);
         message.setContent(textMessage.getContent());
         message.setMsgId(msgId);
         groupMessageMapper.insert(message);
@@ -143,6 +140,42 @@ public class ImServiceImpl implements ImService {
             pro.setContent(TextMessage.from(m).json());
             return pro;
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Protocol> queryLastGroupN(String sender, String group, int n) {
+        List<GroupMessage> messages = groupMessageMapper.queryLastGroupN(group, n);
+        messages = messages.stream().sorted((o1, o2) -> o1.getId() <= o2.getId() ? -1 : 1).collect(Collectors.toList());
+
+        List<Protocol> rlt = new LinkedList<>();
+        for (GroupMessage message : messages) {
+            Protocol protocol = new Protocol();
+            protocol.setType(ProtocolType.business);
+            protocol.setSubType(message.getType());
+            protocol.setMsgId(message.getMsgId());
+            GroupTextMessage textMessage = GroupTextMessage.from(message);
+
+            if (sender.equalsIgnoreCase(message.getSender())) {
+                List<GroupMessageRead> unreads = groupMessageMapper.queryUnreadGroupMessageReadByMsgId(message.getMsgId());
+                if (null == unreads || unreads.isEmpty()) {
+                    textMessage.setUnread(Collections.emptyList());
+                } else {
+                    textMessage.setUnread(unreads.stream().map(GroupMessageRead::getReceiver).collect(Collectors.toList()));
+                }
+            } else {
+                GroupMessageRead groupMessageRead = groupMessageMapper.queryGroupMessageReadByKey(sender, message.getMsgId());
+                if (null == groupMessageRead) {
+                    textMessage.setStatus(MessageStatus.read);
+                } else {
+                    textMessage.setStatus(groupMessageRead.getStatus());
+                }
+            }
+
+            protocol.setContent(textMessage.json());
+            rlt.add(protocol);
+        }
+
+        return rlt;
     }
 
     @Override

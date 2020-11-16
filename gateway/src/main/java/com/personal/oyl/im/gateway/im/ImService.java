@@ -45,6 +45,16 @@ public interface ImService {
     List<Protocol> queryLastN(String loginId1, String loginId2, int n);
 
     /**
+     * 查询last N 群聊消息列表
+     *
+     * @param sender 当前用户ID
+     * @param group 群聊ID
+     * @param n 消息条数
+     * @return 以协议列表形式返回
+     */
+    List<Protocol> queryLastGroupN(String sender, String group, int n);
+
+    /**
      * 置已读状态
      *
      * @param receiver 接收方ID

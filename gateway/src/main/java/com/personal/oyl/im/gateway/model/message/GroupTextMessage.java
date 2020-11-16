@@ -2,10 +2,12 @@ package com.personal.oyl.im.gateway.model.message;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.personal.oyl.im.gateway.im.GroupMessage;
 import com.personal.oyl.im.gateway.im.Message;
 import com.personal.oyl.im.gateway.im.MessageStatus;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author OuYang Liang
@@ -20,6 +22,7 @@ public class GroupTextMessage {
     private String content;
     private MessageStatus status;
     private Date createdTime;
+    private List<String> unread;
 
     public String getSenderId() {
         return senderId;
@@ -69,6 +72,18 @@ public class GroupTextMessage {
         this.createdTime = createdTime;
     }
 
+    public List<String> getUnread() {
+        return unread;
+    }
+
+    public void setUnread(List<String> unread) {
+        this.unread = unread;
+    }
+
+    public int getUnreadCnt() {
+        return (null == this.getUnread()) ? 0 : this.getUnread().size();
+    }
+
     public String json() {
         return gson.toJson(this);
     }
@@ -77,13 +92,12 @@ public class GroupTextMessage {
         return gson.fromJson(json, GroupTextMessage.class);
     }
 
-    /*public static GroupTextMessage from(Message message) {
+    public static GroupTextMessage from(GroupMessage message) {
         GroupTextMessage rlt = new GroupTextMessage();
         rlt.setSenderId(message.getSender());
-        rlt.setReceiverId(message.getReceiver());
+        rlt.setGroupId(message.getGroupId());
         rlt.setContent(message.getContent());
-        rlt.setStatus(message.getStatus());
         rlt.setCreatedTime(message.getCreatedTime());
         return rlt;
-    }*/
+    }
 }

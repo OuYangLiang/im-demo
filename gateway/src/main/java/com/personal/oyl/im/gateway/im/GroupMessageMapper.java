@@ -18,4 +18,8 @@ public interface GroupMessageMapper {
     GroupMessageRead queryGroupMessageReadByKey(String receiver, String msgId);
 
     List<GroupMessageRead> queryUnreadGroupMessageRead(String receiver, String group);
+
+    List<GroupMessageRead> queryUnreadGroupMessageReadByMsgId(String msgId);
+
+    List<GroupMessage> queryLastGroupN(String group, int n);
 }
