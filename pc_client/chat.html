@@ -218,107 +218,105 @@
                         vm.doSend(true, param.msgId, JSON.stringify(param));
                     }
 
-
                 },
-                initChat: function(contact) {
-                    if (contact.type == "individual"){
-                        this.$http.post("queryChat", {loginId1: vm.me.loginId, loginId2: contact.loginId, n: 200}, {emulateJSON: false}).then(function(res) {
-                            if (!res.body.success) {
-                                return;
+                initIndividualChat: function(contact) {
+                    this.$http.post("queryChat", {loginId1: vm.me.loginId, loginId2: contact.loginId, n: 200}, {emulateJSON: false}).then(function(res) {
+                        if (!res.body.success) {
+                            return;
+                        }
+
+                        res.body.data.forEach(function(item, idx) {
+
+                            if (item.type=="business" && item.subType =="text") {
+                                var datacontent = JSON.parse(item.content);
+
+                                if (datacontent.senderId == vm.me.loginId) {
+                                    var param = {};
+                                    param.direction = "sent";
+                                    param.senderId = vm.me.loginId;
+                                    param.receivered = contact.loginId;
+                                    param.timestamp = datacontent.createdTime;
+                                    param.type = "text";
+                                    param.content = datacontent.content;
+                                    param.status = datacontent.status;
+
+                                    vm.messages[contact.loginId].push(param);
+                                } else {
+                                    var param = {};
+                                    param.direction = "received";
+                                    param.senderId = contact.loginId;
+                                    param.userName = vm.users[param.senderId].userName;
+                                    param.icon = vm.users[param.senderId].icon;
+                                    param.receiverId = vm.me.loginId;
+                                    param.timestamp = datacontent.createdTime;
+                                    param.type = "text";
+                                    param.content = datacontent.content;
+                                    param.status = datacontent.status;
+
+                                    if ("read" != datacontent.status) {
+                                        contact.unread++;
+                                    }
+
+                                    vm.messages[datacontent.senderId].push(param);
+                                }
                             }
 
-                            res.body.data.forEach(function(item, idx) {
-
-                                if (item.type=="business" && item.subType =="text") {
-                                    var datacontent = JSON.parse(item.content);
-
-                                    if (datacontent.senderId == vm.me.loginId) {
-                                        var param = {};
-                                        param.direction = "sent";
-                                        param.senderId = vm.me.loginId;
-                                        param.receivered = contact.loginId;
-                                        param.timestamp = datacontent.createdTime;
-                                        param.type = "text";
-                                        param.content = datacontent.content;
-                                        param.status = datacontent.status;
-
-                                        vm.messages[contact.loginId].push(param);
-                                    } else {
-                                        var param = {};
-                                        param.direction = "received";
-                                        param.senderId = contact.loginId;
-                                        param.userName = vm.users[param.senderId].userName;
-                                        param.icon = vm.users[param.senderId].icon;
-                                        param.receiverId = vm.me.loginId;
-                                        param.timestamp = datacontent.createdTime;
-                                        param.type = "text";
-                                        param.content = datacontent.content;
-                                        param.status = datacontent.status;
-
-                                        if ("read" != datacontent.status) {
-                                            contact.unread++;
-                                        }
-
-                                        vm.messages[datacontent.senderId].push(param);
-                                    }
-                                }
-
-                            });
-                        }, function(res) {
-                            console.log(res);
                         });
-                    } else if (contact.type == "group"){
-                        this.$http.post("queryGroupChat", {sender: vm.me.loginId, group: contact.loginId, n: 20}, {emulateJSON: false}).then(function(res) {
-                            if (!res.body.success) {
-                                return;
+                    }, function(res) {
+                        console.log(res);
+                    });
+                },
+                initGroupChat: function(contact) {
+                    this.$http.post("queryGroupChat", {sender: vm.me.loginId, group: contact.loginId, n: 20}, {emulateJSON: false}).then(function(res) {
+                        if (!res.body.success) {
+                            return;
+                        }
+
+                        res.body.data.forEach(function(item, idx) {
+
+                            if (item.type=="business" && item.subType =="group_text") {
+                                var datacontent = JSON.parse(item.content);
+
+                                if (datacontent.senderId == vm.me.loginId) {
+                                    var param = {};
+                                    param.direction = "sent";
+                                    param.senderId = vm.me.loginId;
+                                    param.receivered = contact.loginId;
+                                    param.timestamp = datacontent.createdTime;
+                                    param.type = "text";
+                                    param.content = datacontent.content;
+                                    param.unread = new Set();
+                                    param.unreadCnt = 0;
+                                    datacontent.unread.forEach(function(item){
+                                        param.unread.add(item);
+                                        param.unreadCnt++;
+                                    });
+
+                                    vm.messages[contact.loginId].push(param);
+                                } else {
+                                    var param = {};
+                                    param.direction = "received";
+                                    param.senderId = datacontent.senderId;
+                                    param.userName = vm.users[param.senderId].userName;
+                                    param.icon = vm.users[param.senderId].icon;
+                                    param.receiverId = vm.me.loginId;
+                                    param.timestamp = datacontent.createdTime;
+                                    param.type = "text";
+                                    param.content = datacontent.content;
+                                    param.status = datacontent.status;
+
+                                    if ("read" != datacontent.status) {
+                                        contact.unread++;
+                                    }
+
+                                    vm.messages[datacontent.groupId].push(param);
+                                }
                             }
-                            
-                            res.body.data.forEach(function(item, idx) {
 
-                                if (item.type=="business" && item.subType =="group_text") {
-                                    var datacontent = JSON.parse(item.content);
-
-                                    if (datacontent.senderId == vm.me.loginId) {
-                                        var param = {};
-                                        param.direction = "sent";
-                                        param.senderId = vm.me.loginId;
-                                        param.receivered = contact.loginId;
-                                        param.timestamp = datacontent.createdTime;
-                                        param.type = "text";
-                                        param.content = datacontent.content;
-                                        param.unread = new Set();
-                                        param.unreadCnt = 0;
-                                        datacontent.unread.forEach(function(item){
-                                            param.unread.add(item);
-                                            param.unreadCnt++;
-                                        });
-
-                                        vm.messages[contact.loginId].push(param);
-                                    } else {
-                                        var param = {};
-                                        param.direction = "received";
-                                        param.senderId = datacontent.senderId;
-                                        param.userName = vm.users[param.senderId].userName;
-                                        param.icon = vm.users[param.senderId].icon;
-                                        param.receiverId = vm.me.loginId;
-                                        param.timestamp = datacontent.createdTime;
-                                        param.type = "text";
-                                        param.content = datacontent.content;
-                                        param.status = datacontent.status;
-
-                                        if ("read" != datacontent.status) {
-                                            contact.unread++;
-                                        }
-
-                                        vm.messages[datacontent.groupId].push(param);
-                                    }
-                                }
-
-                            });
-                        }, function(res) {
-                            console.log(res);
                         });
-                    }
+                    }, function(res) {
+                        console.log(res);
+                    });
                 },
                 initContactList: function() {//可以合并
                     this.$http.post("queryFriends", {loginId: vm.me.loginId}, {emulateJSON: false}).then(function(res) {
@@ -336,10 +334,7 @@
                             obj.unread = 0;
                             vm.contacts.push(obj);
                             vm.users[obj.loginId] = obj;
-                        });
-
-                        vm.contacts.forEach(function(item, idx) {
-                            vm.initChat(item);
+                            vm.initIndividualChat(obj);
                         });
                     }, function(res) {
                         console.log(res);
@@ -369,14 +364,13 @@
                             });
 
                             vm.contacts.push(obj);
+                            vm.initGroupChat(obj);
                         });
 
-                        vm.contacts.forEach(function(item, idx) {
-                            vm.initChat(item);
-                        });
                     }, function(res) {
                         console.log(res);
                     });
+
                 },
                 doSend: function(firstTime, msgId, content) {
                     if (firstTime) {
