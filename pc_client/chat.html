@@ -41,7 +41,7 @@
             </div> -->
         </div>
 
-        <div class="chat_box">
+        <div class="chat_box" id="chatBox">
             <div v-for="message of currentMessages" >
                 <div class="message_box_received_header" v-if="message.direction == 'received'">
                     <div class="user">
@@ -108,6 +108,14 @@
     </div>
 
     <script>
+        function scrollToBottom() {
+            Vue.nextTick()
+                .then(function () {
+                    var t = document.getElementById("chatBox");
+                    t.scrollTop = t.scrollHeight;
+                })
+        }
+
         function getFormatDate() {
           var date = new Date();
           var y = date.getFullYear();
@@ -188,7 +196,9 @@
                 },
                 switchContact: function(contact) {
 
-                    vm.currentActive.active = false;
+                    if (vm.currentActive != null) {
+                        vm.currentActive.active = false;
+                    }
                     contact.active = true;
                     vm.currentActive = contact;
                     vm.currentMessages = vm.messages[contact.contactId];
@@ -217,7 +227,6 @@
 
                         vm.doSend(true, param.msgId, JSON.stringify(param));
                     }
-
                 },
                 initIndividualChat: function(contact) {
                     this.$http.post("queryChat", {loginId1: vm.me.loginId, loginId2: contact.contactId, n: 200}, {emulateJSON: false}).then(function(res) {
@@ -324,7 +333,9 @@
                             return;
                         }
 
-                        res.body.data.forEach(function(item, idx) {
+                        for (var i = 0; i < res.body.data.length; i++) {
+                            item = res.body.data[i];
+
                             var obj = {};
                             obj.type = item.type;
                             obj.contactId = item.contactId;
@@ -346,7 +357,8 @@
                             }
 
                             vm.contacts.push(obj);
-                        });
+                        }
+
                     }, function(res) {
                         console.log(res);
                     });
@@ -608,6 +620,9 @@
                 }
             },
             watch: {
+                currentMessages: function(newVal, oldVal) {
+                    scrollToBottom();
+                },
                 contacts: function (newContacts, oldContacts) {
                     newContacts.forEach(function(contact) {
                         if (!vm.messages.hasOwnProperty(contact.contactId)) {
