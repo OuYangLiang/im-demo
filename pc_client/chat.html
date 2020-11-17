@@ -90,7 +90,9 @@
                         未读
                     </div>
                     <div class="unread" v-else-if="currentActive.type == 'group' && message.unreadCnt > 0 ">
-                        {{message.unread}}{{message.unreadCnt}} 人未读
+                        <div v-on:click="popup(currentActive.members, message.unread)">
+                            {{message.unreadCnt}} 人未读
+                        </div>
                     </div>
                     <div class="read" v-else>
                         全部已读
@@ -194,6 +196,22 @@
                         console.log(res);
                     });
                 },
+                popup: function(members, unread) {
+                    var unreads = [];
+                    var reads = [];
+
+                    unread.forEach(function(x) {
+                        unreads.push(vm.users[x].contactName);
+                    });
+
+                    members.forEach(function(x) {
+                      if (!unread.has(x.contactId)) {
+                          reads.push(x.contactName);
+                      }
+                    });
+
+                    alert('未读 ' + unreads.length + " 人：" + unreads + "\n" + '已读 ' + reads.length + " 人："+ reads);
+                },
                 switchContact: function(contact) {
 
                     if (vm.currentActive != null) {
@@ -254,7 +272,7 @@
                                     var param = {};
                                     param.direction = "received";
                                     param.senderId = contact.contactId;
-                                    param.userName = vm.users[param.senderId].userName;
+                                    param.userName = vm.users[param.senderId].contactName;
                                     param.icon = vm.users[param.senderId].icon;
                                     param.receiverId = vm.me.loginId;
                                     param.timestamp = datacontent.createdTime;
@@ -306,7 +324,7 @@
                                     var param = {};
                                     param.direction = "received";
                                     param.senderId = datacontent.senderId;
-                                    param.userName = vm.users[param.senderId].userName;
+                                    param.userName = vm.users[param.senderId].contactName;
                                     param.icon = vm.users[param.senderId].icon;
                                     param.receiverId = vm.me.loginId;
                                     param.timestamp = datacontent.createdTime;
@@ -498,12 +516,13 @@
                             var param = {};
                             param.direction = "received";
                             param.senderId = datacontent.senderId;
-                            param.userName = vm.users[param.senderId].userName;
+                            param.userName = vm.users[param.senderId].contactName;
                             param.icon = vm.users[param.senderId].icon;
                             param.receiverId = vm.me.loginId;
                             param.timestamp = datacontent.createdTime;
                             param.type = data.subType;
                             param.content = datacontent.content;
+                            param.status = datacontent.status;
 
                             //this.currentMessages.push(param);
                             vm.messages[datacontent.senderId].push(param);
@@ -537,7 +556,7 @@
                             var param = {};
                             param.direction = "received";
                             param.senderId = datacontent.senderId;
-                            param.userName = vm.users[param.senderId].userName;
+                            param.userName = vm.users[param.senderId].contactName;
                             param.icon = vm.users[param.senderId].icon;
                             param.receiverId = vm.me.loginId;
                             param.timestamp = datacontent.createdTime;
