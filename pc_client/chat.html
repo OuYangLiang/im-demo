@@ -21,7 +21,7 @@
 
                 <div class="contact_name_box">
                     <div class="contact_name">
-                        {{contact.userName}}
+                        {{contact.contactName}}
                     </div>
                 </div>
 
@@ -191,7 +191,7 @@
                     vm.currentActive.active = false;
                     contact.active = true;
                     vm.currentActive = contact;
-                    vm.currentMessages = vm.messages[contact.loginId];
+                    vm.currentMessages = vm.messages[contact.contactId];
                     contact.unread = 0;
 
                     if (vm.currentActive.type == "individual") {
@@ -200,7 +200,7 @@
                         param.subType = "read_reply";
                         param.msgId = uuid();
                         param.content = {};
-                        param.content.sender = contact.loginId;
+                        param.content.sender = contact.contactId;
                         param.content.receiver = vm.me.loginId;
                         param.content = JSON.stringify(param.content);
 
@@ -211,7 +211,7 @@
                         param.subType = "group_read_reply";
                         param.msgId = uuid();
                         param.content = {};
-                        param.content.group = contact.loginId;
+                        param.content.group = contact.contactId;
                         param.content.receiver = vm.me.loginId;
                         param.content = JSON.stringify(param.content);
 
@@ -220,7 +220,7 @@
 
                 },
                 initIndividualChat: function(contact) {
-                    this.$http.post("queryChat", {loginId1: vm.me.loginId, loginId2: contact.loginId, n: 200}, {emulateJSON: false}).then(function(res) {
+                    this.$http.post("queryChat", {loginId1: vm.me.loginId, loginId2: contact.contactId, n: 200}, {emulateJSON: false}).then(function(res) {
                         if (!res.body.success) {
                             return;
                         }
@@ -234,22 +234,22 @@
                                     var param = {};
                                     param.direction = "sent";
                                     param.senderId = vm.me.loginId;
-                                    param.receivered = contact.loginId;
+                                    param.receivered = contact.contactId;
                                     param.timestamp = datacontent.createdTime;
-                                    param.type = "text";
+                                    param.type = item.subType;
                                     param.content = datacontent.content;
                                     param.status = datacontent.status;
 
-                                    vm.messages[contact.loginId].push(param);
+                                    vm.messages[contact.contactId].push(param);
                                 } else {
                                     var param = {};
                                     param.direction = "received";
-                                    param.senderId = contact.loginId;
+                                    param.senderId = contact.contactId;
                                     param.userName = vm.users[param.senderId].userName;
                                     param.icon = vm.users[param.senderId].icon;
                                     param.receiverId = vm.me.loginId;
                                     param.timestamp = datacontent.createdTime;
-                                    param.type = "text";
+                                    param.type = item.subType;
                                     param.content = datacontent.content;
                                     param.status = datacontent.status;
 
@@ -267,7 +267,7 @@
                     });
                 },
                 initGroupChat: function(contact) {
-                    this.$http.post("queryGroupChat", {sender: vm.me.loginId, group: contact.loginId, n: 20}, {emulateJSON: false}).then(function(res) {
+                    this.$http.post("queryGroupChat", {sender: vm.me.loginId, group: contact.contactId, n: 20}, {emulateJSON: false}).then(function(res) {
                         if (!res.body.success) {
                             return;
                         }
@@ -281,9 +281,9 @@
                                     var param = {};
                                     param.direction = "sent";
                                     param.senderId = vm.me.loginId;
-                                    param.receivered = contact.loginId;
+                                    param.receivered = contact.contactId;
                                     param.timestamp = datacontent.createdTime;
-                                    param.type = "text";
+                                    param.type = item.subType;
                                     param.content = datacontent.content;
                                     param.unread = new Set();
                                     param.unreadCnt = 0;
@@ -292,7 +292,7 @@
                                         param.unreadCnt++;
                                     });
 
-                                    vm.messages[contact.loginId].push(param);
+                                    vm.messages[contact.contactId].push(param);
                                 } else {
                                     var param = {};
                                     param.direction = "received";
@@ -301,7 +301,7 @@
                                     param.icon = vm.users[param.senderId].icon;
                                     param.receiverId = vm.me.loginId;
                                     param.timestamp = datacontent.createdTime;
-                                    param.type = "text";
+                                    param.type = item.subType;
                                     param.content = datacontent.content;
                                     param.status = datacontent.status;
 
@@ -309,7 +309,7 @@
                                         contact.unread++;
                                     }
 
-                                    vm.messages[datacontent.groupId].push(param);
+                                    vm.messages[contact.contactId].push(param);
                                 }
                             }
 
@@ -318,55 +318,35 @@
                         console.log(res);
                     });
                 },
-                initContactList: function() {//可以合并
-                    this.$http.post("queryFriends", {loginId: vm.me.loginId}, {emulateJSON: false}).then(function(res) {
+                initContactList: function() {
+                    this.$http.post("queryContacts", {loginId: vm.me.loginId}, {emulateJSON: false}).then(function(res) {
                         if (!res.body.success) {
                             return;
                         }
 
                         res.body.data.forEach(function(item, idx) {
                             var obj = {};
-                            obj.type = "individual";
-                            obj.loginId = item.loginId;
-                            obj.userName = item.userName;
+                            obj.type = item.type;
+                            obj.contactId = item.contactId;
+                            obj.contactName = item.contactName;
                             obj.icon = item.icon;
                             obj.active = false;
                             obj.unread = 0;
-                            vm.contacts.push(obj);
-                            vm.users[obj.loginId] = obj;
-                            vm.initIndividualChat(obj);
-                        });
-                    }, function(res) {
-                        console.log(res);
-                    });
 
-                    this.$http.post("queryGroups", {loginId: vm.me.loginId}, {emulateJSON: false}).then(function(res) {
-                        if (!res.body.success) {
-                            return;
-                        }
+                            if (obj.type == "individual") {
+                                vm.users[obj.contactId] = obj;
+                                vm.initIndividualChat(obj);
+                            } else if (obj.type == "group") {
+                                obj.members = item.members;
 
-                        res.body.data.forEach(function(item, idx) {
-                            var obj = {};
-                            obj.type = "group";
-                            obj.loginId = item.groupId;
-                            obj.userName = item.groupName;
-                            obj.icon = item.icon;
-                            obj.active = false;
-                            obj.unread = 0;
-                            obj.members = item.members;
-
-                            item.members.forEach(function(item) {
-                                var user = {};
-                                user.loginId = item.loginId;
-                                user.userName = item.userName;
-                                user.icon = item.icon;
-                                vm.users[user.loginId] = user;
-                            });
+                                item.members.forEach(function(item) {
+                                    vm.users[item.contactId] = item;
+                                });
+                                vm.initGroupChat(obj);
+                            }
 
                             vm.contacts.push(obj);
-                            vm.initGroupChat(obj);
                         });
-
                     }, function(res) {
                         console.log(res);
                     });
@@ -405,24 +385,22 @@
                         param.msgId = uuid();
                         param.content = {};
                         param.content.senderId = vm.me.loginId;
-                        param.content.receiverId = this.currentActive.loginId;
+                        param.content.receiverId = this.currentActive.contactId;
                         param.content.content = this.contentInput;
                         param.content = JSON.stringify(param.content);
-
-                        //this.socket.send(JSON.stringify(param));
                         this.doSend(true, param.msgId, JSON.stringify(param));
 
                         param = {};
                         param.direction = "sent";
                         param.senderId = vm.me.loginId;
-                        param.receivered = this.currentActive.loginId;
+                        param.receivered = this.currentActive.contactId;
                         param.timestamp = getFormatDate();
                         param.type = "text";
                         param.status = 'initial';
                         param.content = this.contentInput;
 
                         //this.currentMessages.push(param);
-                        this.messages[vm.currentActive.loginId].push(param);
+                        this.messages[vm.currentActive.contactId].push(param);
                         this.contentInput = '';
                     } else if (vm.currentActive.type == "group") {
                         var param = {};
@@ -431,35 +409,32 @@
                         param.msgId = uuid();
                         param.content = {};
                         param.content.senderId = vm.me.loginId;
-                        param.content.groupId = this.currentActive.loginId;
+                        param.content.groupId = this.currentActive.contactId;
                         param.content.content = this.contentInput;
                         param.content = JSON.stringify(param.content);
-
-                        //this.socket.send(JSON.stringify(param));
                         this.doSend(true, param.msgId, JSON.stringify(param));
 
                         param = {};
                         param.direction = "sent";
                         param.senderId = vm.me.loginId;
-                        param.receivered = this.currentActive.loginId;
+                        param.receivered = this.currentActive.contactId;
                         param.timestamp = getFormatDate();
-                        param.type = "text";
+                        param.type = "group_text";
                         param.status = 'initial';
                         param.unread = new Set();
                         vm.currentActive.members.forEach(function(item){
-                            param.unread.add(item.loginId);
+                            param.unread.add(item.contactId);
                         });
                         param.unreadCnt = vm.currentActive.members.length;
                         param.content = this.contentInput;
 
-                        //this.currentMessages.push(param);
-                        this.messages[vm.currentActive.loginId].push(param);
+                        this.messages[vm.currentActive.contactId].push(param);
                         this.contentInput = '';
                     }
                 },
-                getContact: function(loginId) {
+                getContact: function(contactId) {
                     for(i = 0, len = vm.contacts.length; i < len; i++) {
-                       if (vm.contacts[i].loginId == loginId) {
+                       if (vm.contacts[i].contactId == contactId) {
                            return vm.contacts[i];
                        }
                     }
@@ -515,13 +490,13 @@
                             param.icon = vm.users[param.senderId].icon;
                             param.receiverId = vm.me.loginId;
                             param.timestamp = datacontent.createdTime;
-                            param.type = "text";
+                            param.type = data.subType;
                             param.content = datacontent.content;
 
                             //this.currentMessages.push(param);
                             vm.messages[datacontent.senderId].push(param);
 
-                            if (vm.currentActive.loginId != datacontent.senderId) {
+                            if (vm.currentActive.contactId != datacontent.senderId) {
                                 vm.getContact(datacontent.senderId).unread++;
                             }
 
@@ -530,13 +505,13 @@
                             param.msgId = data.msgId;
                             vm.socket.send(JSON.stringify(param));
 
-                            if (vm.currentActive.loginId == datacontent.senderId) {
+                            if (vm.currentActive.contactId == datacontent.senderId) {
                                 var param = {};
                                 param.type = "business";
                                 param.subType = "read_reply";
                                 param.msgId = uuid();
                                 param.content = {};
-                                param.content.sender = vm.currentActive.loginId;
+                                param.content.sender = vm.currentActive.contactId;
                                 param.content.receiver = vm.me.loginId;
                                 param.content.msgId = data.msgId;
                                 param.content = JSON.stringify(param.content);
@@ -554,13 +529,11 @@
                             param.icon = vm.users[param.senderId].icon;
                             param.receiverId = vm.me.loginId;
                             param.timestamp = datacontent.createdTime;
-                            param.type = "text";
+                            param.type = data.subType;
                             param.content = datacontent.content;
-
-                            //this.currentMessages.push(param);
                             vm.messages[datacontent.groupId].push(param);
 
-                            if (vm.currentActive.loginId != datacontent.groupId) {
+                            if (vm.currentActive.contactId != datacontent.groupId) {
                                 vm.getContact(datacontent.groupId).unread++;
                             }
 
@@ -569,7 +542,7 @@
                             param.msgId = data.msgId;
                             vm.socket.send(JSON.stringify(param));
 
-                            if (vm.currentActive.loginId == datacontent.groupId) {
+                            if (vm.currentActive.contactId == datacontent.groupId) {
                                 var param = {};
                                 param.type = "business";
                                 param.subType = "group_read_reply";
@@ -607,8 +580,8 @@
 
                             for(i = 0, len = messages.length; i < len; i++) {
                                 var message = messages[i];
-                                if (message.direction == "sent")
-                                {
+
+                                if (message.direction == "sent") {
                                     if (message.unread.has(datacontent.receiver)) {
                                         message.unreadCnt--;
                                         message.unread.delete(datacontent.receiver);
@@ -637,15 +610,15 @@
             watch: {
                 contacts: function (newContacts, oldContacts) {
                     newContacts.forEach(function(contact) {
-                        if (!vm.messages.hasOwnProperty(contact.loginId)) {
-                            vm.messages[contact.loginId] = [];
+                        if (!vm.messages.hasOwnProperty(contact.contactId)) {
+                            vm.messages[contact.contactId] = [];
                         }
                     });
 
                     if (null == vm.currentActive && vm.contacts.length > 0) {
                         vm.contacts[0].active = true;
                         vm.currentActive = vm.contacts[0];
-                        vm.currentMessages = vm.messages[vm.currentActive.loginId];
+                        vm.currentMessages = vm.messages[vm.currentActive.contactId];
                     }
                 }
             },

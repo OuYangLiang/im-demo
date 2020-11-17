@@ -11,10 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -82,30 +79,30 @@ public class DefaultController {
         return WebResult.success(connectionMgr.onlineUsers());
     }*/
 
-    @RequestMapping("/queryFriends")
-    public WebResult<List<UserDto>> queryFriends(@RequestBody FriendsQueryParam param) {
-        List<User> users = userService.queryFriends(param.getLoginId());
-        if (null == users || users.isEmpty()) {
-            return WebResult.success(Collections.emptyList());
-        }
-
-        return WebResult.success(users.stream().map(UserDto::from).collect(Collectors.toList()));
-    }
-
-    @RequestMapping("/queryGroups")
-    public WebResult<List<GroupDto>> queryGroups(@RequestBody GroupQueryParam param) {
+    @RequestMapping("/queryContacts")
+    public WebResult<List<ContactDto>> queryContacts(@RequestBody ContactQueryParam param) {
         String groupId = "group";
-        GroupDto result = new GroupDto();
-        result.setGroupId(groupId);
-        result.setGroupName("满帮CRM");
-        result.setIcon("group.jpg");
+        ContactDto contact = new ContactDto();
+        contact.setType("group");
+        contact.setContactId(groupId);
+        contact.setContactName("满帮CRM");
+        contact.setIcon("group.jpg");
 
         List<User> users = userService.queryUserByGroup(groupId);
-        List<UserDto> members = (null == users || users.isEmpty()) ? Collections.emptyList() :
-                users.stream().filter((u)-> !u.getLoginId().equalsIgnoreCase(param.getLoginId())).map(UserDto::from).collect(Collectors.toList());
-        result.setMembers(members);
+        List<ContactDto> members = (null == users || users.isEmpty()) ? Collections.emptyList() :
+                users.stream().filter((u)-> !u.getLoginId().equalsIgnoreCase(param.getLoginId())).map(ContactDto::from).collect(Collectors.toList());
+        contact.setMembers(members);
 
-        return WebResult.success(Collections.singletonList(result));
+        List<ContactDto> result = new LinkedList<>();
+        result.add(contact);
+
+        users = userService.queryFriends(param.getLoginId());
+        if (null == users || users.isEmpty()) {
+            return WebResult.success(result);
+        }
+
+        result.addAll(users.stream().map(ContactDto::from).collect(Collectors.toList()));
+        return WebResult.success(result);
     }
 
     @RequestMapping("/queryChat")
