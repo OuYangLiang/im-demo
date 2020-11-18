@@ -91,7 +91,6 @@ public class ImServiceImpl implements ImService {
                 GroupTextMessage param = new GroupTextMessage();
 
                 param.setSenderId(message.getSender());
-                param.setReceiverId(user.getLoginId());
                 param.setGroupId(textMessage.getGroupId());
                 param.setContent(message.getContent());
                 param.setCreatedTime(message.getCreatedTime());

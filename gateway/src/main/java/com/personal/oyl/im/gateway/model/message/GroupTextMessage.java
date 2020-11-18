@@ -3,7 +3,6 @@ package com.personal.oyl.im.gateway.model.message;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.personal.oyl.im.gateway.im.GroupMessage;
-import com.personal.oyl.im.gateway.im.Message;
 import com.personal.oyl.im.gateway.im.MessageStatus;
 
 import java.util.Date;
@@ -17,7 +16,6 @@ public class GroupTextMessage {
     private static final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
     private String senderId;
-    private String receiverId;
     private String groupId;
     private String content;
     private MessageStatus status;
@@ -30,14 +28,6 @@ public class GroupTextMessage {
 
     public void setSenderId(String senderId) {
         this.senderId = senderId;
-    }
-
-    public String getReceiverId() {
-        return receiverId;
-    }
-
-    public void setReceiverId(String receiverId) {
-        this.receiverId = receiverId;
     }
 
     public String getGroupId() {
